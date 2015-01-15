@@ -29,16 +29,20 @@ already or be passed as an argument.
 ## transform\_data
 Transform the data according to rules specified as callbacks that the
 module calls for you.
- my ($data\_transformed, @errors) = $processor->transform\_data(data=>$data);
+
+    my ($data_transformed, @errors) = $processor->transform_data(data=>$data);
 
 ## transform\_schema
- my ($schema\_transformed, @errors) = $processor->transform\_schema(schema=>$schema);
+
+    my ($schema_transformed, @errors) = $processor->transform_schema(schema=>$schema);
 
 ## make\_data
- my ($data, @errors) = $processor->make\_data(data=>$data);
+
+    my ($data, @errors) = $processor->make_data(data=>$data);
 
 ## make\_pod
- my ($pod, @errors) = $processor->make\_pod(data=>$data);
+
+    my ($pod, @errors) = $processor->make_pod(data=>$data);
 
 # AUTHOR
 
