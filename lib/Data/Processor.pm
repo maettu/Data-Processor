@@ -2,7 +2,7 @@ package Data::Processor;
 
 use strict;
 use 5.008_005;
-our $VERSION = '0.01';
+our $VERSION = '0.0.1';
 
 1;
 __END__
@@ -11,7 +11,7 @@ __END__
 
 =head1 NAME
 
-Data::Processor - Blah blah blah
+Data::Processor - Transform Perl Data Structures, Verify against a Schema, Produce Data from a Schema
 
 =head1 SYNOPSIS
 
@@ -19,7 +19,7 @@ Data::Processor - Blah blah blah
 
 =head1 DESCRIPTION
 
-Data::Processor is
+Data::Processor is a tool for transforming, verifying, and producing Perl data structures from / against a schema, defined as a Perl data structure.
 
 =head1 AUTHOR
 
