@@ -1,5 +1,5 @@
 {
-   "abstract" : "Transform Perl Data Structures, Verify against a Schema, Produce Data from a Schema",
+   "abstract" : "Transform Perl Data Structures, Validate Data against a Schema, Produce Data from a Schema, or produce documentation directly from information in the Data",
    "author" : [
       "Matthias Bloch <matthias.bloch@puffin.ch>"
    ],
