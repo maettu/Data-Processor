@@ -5,7 +5,6 @@ package Data::Processor::Error::Collection;
 use Data::Processor::Error::Instance;
 
 
-=pod
 =head1 NAME
 Data::Processor::Error::Collection - Collect errors
 =cut

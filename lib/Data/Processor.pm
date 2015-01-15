@@ -56,7 +56,6 @@ sub validate{
     # XXX
 }
 
-=pod
 =head2 transform_data
 Transform the data according to rules specified as callbacks that the
 module calls for you.
@@ -68,7 +67,6 @@ sub transform_data{
     #XXX
 }
 
-=pod
 =head2 transform_schema
  my ($schema_transformed, @errors) = $processor->transform_schema(schema=>$schema);
 =cut
@@ -78,7 +76,6 @@ sub transform_schema{
     # XXX
 }
 
-=pod
 =head2 make_data
  my ($data, @errors) = $processor->make_data(data=>$data);
 =cut
@@ -88,7 +85,6 @@ sub make_data{
     # XXX
 }
 
-=pod
 =head2 make_pod
  my ($pod, @errors) = $processor->make_pod(data=>$data);
 =cut
