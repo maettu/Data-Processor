@@ -6,9 +6,6 @@ our $VERSION = '0.0.1';
 
 use Data::Processor::Error::Collection;
 
-=pod
-=encoding utf-8
-
 =head1 NAME
 
 Data::Processor - Transform Perl Data Structures, Validate Data against a Schema, Produce Data from a Schema, or produce documentation directly from information in the Data
@@ -46,7 +43,6 @@ sub new{
     return $self;
 }
 
-=pod
 =head2 validate
 Validate the data against a schema. The schema either needs to be present
 already or be passed as an argument.
