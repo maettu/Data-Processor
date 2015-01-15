@@ -59,7 +59,9 @@ sub validate{
 =head2 transform_data
 Transform the data according to rules specified as callbacks that the
 module calls for you.
+
  my ($data_transformed, @errors) = $processor->transform_data(data=>$data);
+
 =cut
 sub transform_data{
     require Data::Processor::Transformer;
@@ -68,7 +70,9 @@ sub transform_data{
 }
 
 =head2 transform_schema
+
  my ($schema_transformed, @errors) = $processor->transform_schema(schema=>$schema);
+
 =cut
 sub transform_schema{
     require Data::Processor::Transformer;
@@ -77,7 +81,9 @@ sub transform_schema{
 }
 
 =head2 make_data
+
  my ($data, @errors) = $processor->make_data(data=>$data);
+
 =cut
 sub make_data{
     require Data::Processor::Generator;
@@ -86,7 +92,9 @@ sub make_data{
 }
 
 =head2 make_pod
+
  my ($pod, @errors) = $processor->make_pod(data=>$data);
+
 =cut
 sub make_pod{
     require Data::Processor::PodWriter;
