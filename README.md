@@ -10,6 +10,8 @@ Data::Processor - Transform Perl Data Structures, Verify against a Schema, Produ
 
 Data::Processor is a tool for transforming, verifying, and producing Perl data structures from / against a schema, defined as a Perl data structure.
 
+# METHODS
+
 # AUTHOR
 
 Matthias Bloch <matthias.bloch@puffin.ch>
