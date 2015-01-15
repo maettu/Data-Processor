@@ -4,8 +4,6 @@ use strict;
 use 5.008_005;
 our $VERSION = '0.0.1';
 
-1;
-__END__
 
 =encoding utf-8
 
@@ -20,6 +18,9 @@ Data::Processor - Transform Perl Data Structures, Verify against a Schema, Produ
 =head1 DESCRIPTION
 
 Data::Processor is a tool for transforming, verifying, and producing Perl data structures from / against a schema, defined as a Perl data structure.
+
+=head1 METHODS
+
 
 =head1 AUTHOR
 
@@ -37,3 +38,6 @@ it under the same terms as Perl itself.
 =head1 SEE ALSO
 
 =cut
+1;
+__END__
+
