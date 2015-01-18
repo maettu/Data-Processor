@@ -1,3 +1,10 @@
+use strict;
+use lib 'lib';
+use Test::More;
+use Data::Processor;
+
+ok(1);
+
 # XXX
 #~ my $config_template = $validator->make_config_template(verbose => 1);
 #~
@@ -11,3 +18,4 @@
 #~     'url has correct content');
 #~
 
+done_testing;
