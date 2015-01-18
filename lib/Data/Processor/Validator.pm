@@ -285,6 +285,23 @@ sub __key_present_in_schema{
     return $key_schema_to_descend_into
 }
 
+# 'validator' specified gets this called to call the callback :-)
+sub __validator_returns_undef {
+    my $self = shift;
+    my $key    = shift;
+    my $config_section = shift;
+    my $schema_section = shift;
+    $self->explain("running validator for '$key': $config_section->{$key}\n");
+    my $return_value = $schema_section->{$key}->{validator}->($config_section->{$key}, $config_section);
+    if ($return_value){
+        $self->explain("validator error: $return_value\n");
+        $self->error("Execution of validator for '$key' returns with error: $return_value");
+    }
+    else {
+        $self->explain("successful validation for key '$key'\n");
+    }
+}
+
 # called by _validate to check if a value is in line with definitions
 # in the schema.
 sub __value_is_valid{
