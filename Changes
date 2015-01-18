@@ -1,8 +1,10 @@
 Revision history for Data-Processor
 
 {{$NEXT}}
+
+0.1.0  2015-01-18 16:50:50 CET
     - Error Collector added
-    - Basic functionality
+    - Basic functionality: validation without frills
 
 0.0.3  2015-01-15 21:37:19 CET
     0.0.3 pod up

@@ -5,6 +5,7 @@ Data::Processor - Transform Perl Data Structures, Validate Data against a Schema
 # SYNOPSIS
 
     use Data::Processor;
+    # XXX
 
 # DESCRIPTION
 
@@ -18,7 +19,9 @@ Data::Processor is a tool for transforming, verifying, and producing Perl data s
 
 optional parameters:
 \- schema: schema to validate against. Can also be specified later
-\- indent: count of spaces to insert when printing in verbose mode
+\- indent: count of spaces to insert when printing in verbose mode. Default 4
+\- depth: level at which to start. Default is 0.
+\- verbose: Set to a true value to print messages during processing.
 
 ## validate
 Validate the data against a schema. The schema either needs to be present
@@ -56,5 +59,3 @@ Copyright 2015- Matthias Bloch
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
-
-# SEE ALSO
