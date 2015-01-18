@@ -24,7 +24,8 @@ my $error_collection = $processor->validate(data=>$data);
 my @errors = $error_collection->as_array();
 ok (scalar(@errors)==2, '2 errors found');
 ok ($error_collection->count()==2, 'error count =2');
-
+ok ($error_collection->any_error_contains(string => 'not_existing', field => 'message'),
+    "mandatory schema key 'not_existing' not in config");
 
 done_testing;
 

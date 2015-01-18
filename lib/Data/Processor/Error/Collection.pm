@@ -2,6 +2,7 @@ use 5.10.1;
 use strict;
 use warnings;
 package Data::Processor::Error::Collection;
+use Carp;
 use Data::Processor::Error::Instance;
 
 =head1 NAME
@@ -32,8 +33,27 @@ sub add {
     push @{$self->{errors}}, $error;
 }
 
+=head2 any_error_contains
+Return true if any of the collected errors contains a given string.
+  $error->collection->any_error_contains(
+            string => "error_msg",
+            field  => "message", # any of the data fields of an error
+  );
+=cut
+sub any_error_contains {
+    my $self = shift;
+    my %p    = @_;
+    for ('string', 'field'){
+        croak "cannot check for errors without '$_'"
+            unless $p{$_};
+    }
+    for my $error (@{$self->{errors}}){
+        return 1 if $error->{$p{field}} =~ /$p{string}/;
+    }
+}
+
 =head2 as_array
-    Return all collected errors as an array.
+Return all collected errors as an array.
 =cut
 sub as_array {
     my $self = shift;
@@ -41,7 +61,7 @@ sub as_array {
 }
 
 =head2 count
-    Return count of errors.
+Return count of errors.
 =cut
 sub count {
     my $self = shift;
