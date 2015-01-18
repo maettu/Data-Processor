@@ -2,8 +2,9 @@ package Data::Processor;
 
 use strict;
 use 5.010_001;
-our $VERSION = '0.0.1';
+our $VERSION = '0.1.0';
 
+use Carp;
 use Data::Processor::Error::Collection;
 
 =head1 NAME
@@ -13,6 +14,7 @@ Data::Processor - Transform Perl Data Structures, Validate Data against a Schema
 =head1 SYNOPSIS
 
   use Data::Processor;
+  # XXX
 
 =head1 DESCRIPTION
 
@@ -26,18 +28,21 @@ Data::Processor is a tool for transforming, verifying, and producing Perl data s
 
 optional parameters:
 - schema: schema to validate against. Can also be specified later
-- indent: count of spaces to insert when printing in verbose mode
+- indent: count of spaces to insert when printing in verbose mode. Default 4
+- depth: level at which to start. Default is 0.
+- verbose: Set to a true value to print messages during processing.
 
 =cut
 sub new{
     my $class = shift;
     my %p     = @_;
     my $self = {
-        schema => $p{schema} // undef,
-        errors => Data::Processor::Error::Collection->new(),
-        depth  => 0,
-        indent => $p{indent} // 4,
-        parent_keys => ['root']
+        schema      => $p{schema} // undef,
+        errors      => Data::Processor::Error::Collection->new(),
+        depth       => $p{depth}  // 0,
+        indent      => $p{indent} // 4,
+        parent_keys => ['root'],
+        verbose     => $p{verbose} // undef,
     };
     bless ($self, $class);
     return $self;
@@ -52,8 +57,18 @@ already or be passed as an argument.
 sub validate{
     require Data::Processor::Validator;
     my $self = shift;
-    die 'unimplemented';
-    # XXX
+    my %p    = @_;
+
+    $self->{validator}=Data::Processor::Validator->new(
+        schema      => $self->{schema} // $p{schema},
+        data        => $p{data} ,
+        verbose     => $p{verbose} // $self->{verbose} // undef,
+        errors      => $self->{errors},
+        depth       => $self->{depth},
+        indent      => $self->{indent},
+        parent_keys => $self->{parent_keys},
+    );
+    return $self->{validator}->validate();
 }
 
 =head2 transform_data
@@ -114,8 +129,6 @@ Copyright 2015- Matthias Bloch
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
-
-=head1 SEE ALSO
 
 =cut
 1;

@@ -28,7 +28,7 @@ Adds an error.
 sub add {
     my $self = shift;
     my %p    = @_;
-    my $error = Data::Structure::Validation::Error::Instance->new(%p);
+    my $error = Data::Processor::Error::Instance->new(%p);
     push @{$self->{errors}}, $error;
 }
 
