@@ -30,8 +30,8 @@ sub new {
 
 sub validate {
     my $self = shift;
+    $self->{errors} = Data::Processor::Error::Collection->new();
     $self->_validate($self->{data}, $self->{schema}, 'root');
-#~     return $self->{errors}->as_array();
     return $self->{errors};
 }
 
