@@ -2,6 +2,10 @@ Revision history for Data-Processor
 
 {{$NEXT}}
 
+0.1.1  2015-01-18 21:48:47 CET
+    - more test (mostly ported from old module)
+    - ValidatorFactory
+
 0.1.0  2015-01-18 16:50:50 CET
     - Error Collector added
     - Basic functionality: validation without frills
