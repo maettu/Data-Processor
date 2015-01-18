@@ -31,7 +31,8 @@ sub new {
 sub validate {
     my $self = shift;
     $self->_validate($self->{data}, $self->{schema}, 'root');
-    return $self->{errors}->as_array();
+#~     return $self->{errors}->as_array();
+    return $self->{errors};
 }
 
 #################

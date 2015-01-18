@@ -20,8 +20,10 @@ chomp $@;
 ok ($@ =~ /^cannot validate without "data"/, $@);
 
 my $data = data();
-my @errors = $processor->validate(data=>$data);
+my $error_collection = $processor->validate(data=>$data);
+my @errors = $error_collection->as_array();
 ok (scalar(@errors)==2, '2 errors found');
+ok ($error_collection->count()==2, 'error count =2');
 
 
 done_testing;

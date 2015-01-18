@@ -35,9 +35,17 @@ sub add {
 =head2 as_array
     Return all collected errors as an array.
 =cut
-sub as_array{
+sub as_array {
     my $self = shift;
     return @{$self->{errors}};
+}
+
+=head2 count
+    Return count of errors.
+=cut
+sub count {
+    my $self = shift;
+    return scalar @{$self->{errors}};
 }
 1;
 
