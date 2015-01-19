@@ -5,8 +5,8 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-  NAME         => 'Data::Structure::Validation',
-  VERSION_FROM => 'lib/Data/Structure/Validation.pm',
+  NAME         => 'Data::Processor',
+  VERSION_FROM => 'lib/Data/Processor.pm',
   ABSTRACT     => 'validate a data structure against a schema',
   AUTHOR       => 'Matthias Bloch <matthias.bloch@puffin.ch>',
   LICENSE      => 'artistic_2',
