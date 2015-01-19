@@ -7,8 +7,6 @@ our $VERSION = '0.1.2';
 use Carp;
 use Data::Processor::Error::Collection;
 
-break this commit
-
 =head1 NAME
 
 Data::Processor - Transform Perl Data Structures, Validate Data against a Schema, Produce Data from a Schema, or produce documentation directly from information in the Data
