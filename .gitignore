@@ -2,6 +2,7 @@
 /.build
 /_build*
 /Build
+Build.PL
 MYMETA.*
 !META.json
 /.prove
