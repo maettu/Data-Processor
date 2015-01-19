@@ -2,6 +2,9 @@
 
 Data::Processor - Transform Perl Data Structures, Validate Data against a Schema, Produce Data from a Schema, or produce documentation directly from information in the Data
 
+[![Build Status](https://travis-ci.org/maettu/Data-Processor.svg?branch=master
+)](https://travis-ci.org/maettu/Data-Processor)
+
 # SYNOPSIS
 
     use Data::Processor;
