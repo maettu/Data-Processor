@@ -1,9 +1,8 @@
 # NAME
 
-Data::Processor - Transform Perl Data Structures, Validate Data against a Schema, Produce Data from a Schema, or produce documentation directly from information in the Data
+THIS MODULE ONLY WORKS FOR A NARROW USE CASE RIGHT NOW. ALSO, INTERFACE CHANGES ARE LIKELY.
 
-[![Build Status](https://travis-ci.org/maettu/Data-Processor.svg?branch=master
-)](https://travis-ci.org/maettu/Data-Processor)
+Data::Processor - Transform Perl Data Structures, Validate Data against a Schema, Produce Data from a Schema, or produce documentation directly from information in the Data
 
 # SYNOPSIS
 
@@ -33,6 +32,9 @@ already or be passed as an argument.
     my @errors = $processor->validate(schema=>$schema, data=>$data, verbose=>0);
 
 ## transform\_data
+
+UNIMPLEMENTED
+
 Transform the data according to rules specified as callbacks that the
 module calls for you.
 
@@ -40,13 +42,19 @@ module calls for you.
 
 ## transform\_schema
 
+UNIMPLEMENTED
+
     my ($schema_transformed, @errors) = $processor->transform_schema(schema=>$schema);
 
 ## make\_data
 
+UNIMPLEMENTED
+
     my ($data, @errors) = $processor->make_data(data=>$data);
 
 ## make\_pod
+
+UNIMPLEMENTED
 
     my ($pod, @errors) = $processor->make_pod(data=>$data);
 
