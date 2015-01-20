@@ -1,6 +1,7 @@
 Revision history for Data-Processor
 
 {{$NEXT}}
+    - not-ready and interface change warning added
 
 0.1.2  2015-01-19 11:15:29 CET
     - Makefile.PL instead of Build.PL

@@ -2,12 +2,14 @@ package Data::Processor;
 
 use strict;
 use 5.010_001;
-our $VERSION = '0.1.2';
+our $VERSION = '0.1.3';
 
 use Carp;
 use Data::Processor::Error::Collection;
 
 =head1 NAME
+
+THIS MODULE ONLY WORKS FOR A NARROW USE CASE RIGHT NOW. ALSO, INTERFACE CHANGES ARE LIKELY.
 
 Data::Processor - Transform Perl Data Structures, Validate Data against a Schema, Produce Data from a Schema, or produce documentation directly from information in the Data
 
@@ -72,6 +74,9 @@ sub validate{
 }
 
 =head2 transform_data
+
+UNIMPLEMENTED
+
 Transform the data according to rules specified as callbacks that the
 module calls for you.
 
@@ -86,6 +91,8 @@ sub transform_data{
 
 =head2 transform_schema
 
+UNIMPLEMENTED
+
  my ($schema_transformed, @errors) = $processor->transform_schema(schema=>$schema);
 
 =cut
@@ -97,6 +104,8 @@ sub transform_schema{
 
 =head2 make_data
 
+UNIMPLEMENTED
+
  my ($data, @errors) = $processor->make_data(data=>$data);
 
 =cut
@@ -107,6 +116,8 @@ sub make_data{
 }
 
 =head2 make_pod
+
+UNIMPLEMENTED
 
  my ($pod, @errors) = $processor->make_pod(data=>$data);
 
