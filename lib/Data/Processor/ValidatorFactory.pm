@@ -65,6 +65,23 @@ sub file {
     }
 }
 
+=head2 dir()
+
+check if the given directory exists
+
+ $vf->dir();
+
+=cut
+
+sub dir {
+    my $self = shift;
+    return sub {
+        my $value = shift;
+        return undef if -d $value;
+        return "directory $value does not exist";
+    }
+}
+
 =head2 rx($rx,$message)
 
 apply the regular expression to the value and return $message if it does
