@@ -26,8 +26,12 @@ my $schema = {
         array => 1,
         validator => sub {
             my $value = shift;
-            return $value =~ /\d+/ ? undef : 'numeric element expected';
+            return $value =~ /^\d+$/ ? undef : 'numeric element expected';
         }
+    },
+    simplearrayval => {
+        array => 1,
+        value => qr/\d+/,
     },
 };
 
@@ -48,6 +52,7 @@ my $data = {
     bar => 'empty',
 
     simplearray => [0, 1, 'fail', 3, 4],
+    simplearrayval => [0, 'fail', 2, 3, 4],
 };
 
 my $p = Data::Processor->new(schema => $schema);
@@ -55,7 +60,7 @@ my $p = Data::Processor->new(schema => $schema);
 my $error_collection = $p->validate(data => $data, verbose=>0);
 
 # wrong array element will give 3 errors: 1 wrong key and 2 missing mandatory keys
-ok ($error_collection->count == 7, '7 errors detected');
+ok ($error_collection->count == 8, '8 errors detected');
 
 ok ($error_collection->any_error_contains(
         string => 'should have members',

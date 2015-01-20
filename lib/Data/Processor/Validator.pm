@@ -358,15 +358,33 @@ sub __value_is_valid{
             # possibly never implement this because of new "validator"
         }
         elsif (ref($schema_section->{$key}->{value}) eq 'Regexp'){
-            $self->explain(">>match '$config_section->{$key}' against '$schema_section->{$key}->{value}'");
+            if (ref $config_section->{$key} eq ref []
+                && exists $schema_section->{$key}->{array} && $schema_section->{$key}->{array}){
 
-            if ($config_section->{$key} =~ m/^$schema_section->{$key}->{value}$/){
-                $self->explain(" ok.\n");
+                for my $elem (@{$config_section->{$key}}){
+                    $self->explain(">>match '$elem' against '$schema_section->{$key}->{value}'");
+
+                    if ($elem =~ m/^$schema_section->{$key}->{value}$/){
+                        $self->explain(" ok.\n");
+                    }
+                    else{
+                        # XXX never reach this?
+                        $self->explain(" no.\n");
+                        $self->error("$elem does not match ^$schema_section->{$key}->{value}\$");
+                    }
+                }
             }
-            else{
-                # XXX never reach this?
-                $self->explain(" no.\n");
-                $self->error("$config_section->{$key} does not match ^$schema_section->{$key}->{value}\$");
+            else {
+               $self->explain(">>match '$config_section->{$key}' against '$schema_section->{$key}->{value}'");
+
+                if ($config_section->{$key} =~ m/^$schema_section->{$key}->{value}$/){
+                    $self->explain(" ok.\n");
+                }
+                else{
+                    # XXX never reach this?
+                    $self->explain(" no.\n");
+                    $self->error("$config_section->{$key} does not match ^$schema_section->{$key}->{value}\$");
+                }
             }
         }
         else{
