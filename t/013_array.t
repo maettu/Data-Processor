@@ -22,6 +22,13 @@ my $schema = {
             }
         }
     },
+    simplearray => {
+        array => 1,
+        validator => sub {
+            my $value = shift;
+            return $value =~ /\d+/ ? undef : 'numeric element expected';
+        }
+    },
 };
 
 my $data = {
@@ -38,7 +45,9 @@ my $data = {
     'foo'  => 'error: members missing',
     'fo'   => 'not in schema',
 
-    bar => 'empty'
+    bar => 'empty',
+
+    simplearray => [0, 1, 'fail', 3, 4],
 };
 
 my $p = Data::Processor->new(schema => $schema);
@@ -46,7 +55,7 @@ my $p = Data::Processor->new(schema => $schema);
 my $error_collection = $p->validate(data => $data, verbose=>0);
 
 # wrong array element will give 3 errors: 1 wrong key and 2 missing mandatory keys
-ok ($error_collection->count == 6, '6 errors detected');
+ok ($error_collection->count == 7, '7 errors detected');
 
 ok ($error_collection->any_error_contains(
         string => 'should have members',

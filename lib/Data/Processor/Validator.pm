@@ -311,13 +311,32 @@ sub __validator_returns_undef {
     my $config_section = shift;
     my $schema_section = shift;
     $self->explain("running validator for '$key': $config_section->{$key}\n");
-    my $return_value = $schema_section->{$key}->{validator}->($config_section->{$key}, $config_section);
-    if ($return_value){
-        $self->explain("validator error: $return_value\n");
-        $self->error("Execution of validator for '$key' returns with error: $return_value");
+    
+    if (ref $config_section->{$key} eq ref []
+        && exists $schema_section->{$key}->{array} && $schema_section->{$key}->{array}){
+
+        my $counter = 0;
+        for my $elem (@{$config_section->{$key}}){
+            my $return_value = $schema_section->{$key}->{validator}->($elem, $config_section);
+            if ($return_value){
+                $self->explain("validator error: $return_value (element $counter)\n");
+                $self->error("Execution of validator for '$key' element $counter returns with error: $return_value");
+            }
+            else {
+                $self->explain("successful validation for key '$key' element $counter\n");
+            }
+            $counter++;
+        }
     }
     else {
-        $self->explain("successful validation for key '$key'\n");
+        my $return_value = $schema_section->{$key}->{validator}->($config_section->{$key}, $config_section);
+        if ($return_value){
+            $self->explain("validator error: $return_value\n");
+            $self->error("Execution of validator for '$key' returns with error: $return_value");
+        }
+        else {
+            $self->explain("successful validation for key '$key'\n");
+        }
     }
 }
 
