@@ -127,6 +127,22 @@ sub _validate {
             pop @{$self->{parent_keys}};
             $self->{depth}--;
         }
+        elsif ((ref $config_section->{$key} eq ref []) && $descend_into
+            && exists $schema_section->{$key_schema_to_descend_into}->{array}
+            && $schema_section->{$key_schema_to_descend_into}->{array}){
+
+            $self->explain(">>'$key' is an array reference so we check all elements\n");
+            push @{$self->{parent_keys}}, $key;
+            $self->{depth}++;
+            for my $member (@{$config_section->{$key}}){
+                $self->_validate(
+                    $member,
+                    $schema_section->{$key_schema_to_descend_into}->{members}
+                );
+            }
+            pop @{$self->{parent_keys}};
+            $self->{depth}--;
+        }
         # Make sure that key in config is a leaf in schema.
         # We cannot descend into a non-existing branch in config
         # but it might be required by the schema.
@@ -228,6 +244,9 @@ sub _check_mandatory_keys{
                 $self->explain("$c matching occurencies found\n");
                 next if $c > 0;
             }
+            next if exists $schema_section->{$key}->{array}
+                && $schema_section->{$key}->{array};
+
 
             # should only get here in case of error.
 
@@ -292,13 +311,32 @@ sub __validator_returns_undef {
     my $config_section = shift;
     my $schema_section = shift;
     $self->explain("running validator for '$key': $config_section->{$key}\n");
-    my $return_value = $schema_section->{$key}->{validator}->($config_section->{$key}, $config_section);
-    if ($return_value){
-        $self->explain("validator error: $return_value\n");
-        $self->error("Execution of validator for '$key' returns with error: $return_value");
+    
+    if (ref $config_section->{$key} eq ref []
+        && exists $schema_section->{$key}->{array} && $schema_section->{$key}->{array}){
+
+        my $counter = 0;
+        for my $elem (@{$config_section->{$key}}){
+            my $return_value = $schema_section->{$key}->{validator}->($elem, $config_section);
+            if ($return_value){
+                $self->explain("validator error: $return_value (element $counter)\n");
+                $self->error("Execution of validator for '$key' element $counter returns with error: $return_value");
+            }
+            else {
+                $self->explain("successful validation for key '$key' element $counter\n");
+            }
+            $counter++;
+        }
     }
     else {
-        $self->explain("successful validation for key '$key'\n");
+        my $return_value = $schema_section->{$key}->{validator}->($config_section->{$key}, $config_section);
+        if ($return_value){
+            $self->explain("validator error: $return_value\n");
+            $self->error("Execution of validator for '$key' returns with error: $return_value");
+        }
+        else {
+            $self->explain("successful validation for key '$key'\n");
+        }
     }
 }
 
@@ -320,15 +358,33 @@ sub __value_is_valid{
             # possibly never implement this because of new "validator"
         }
         elsif (ref($schema_section->{$key}->{value}) eq 'Regexp'){
-            $self->explain(">>match '$config_section->{$key}' against '$schema_section->{$key}->{value}'");
+            if (ref $config_section->{$key} eq ref []
+                && exists $schema_section->{$key}->{array} && $schema_section->{$key}->{array}){
 
-            if ($config_section->{$key} =~ m/^$schema_section->{$key}->{value}$/){
-                $self->explain(" ok.\n");
+                for my $elem (@{$config_section->{$key}}){
+                    $self->explain(">>match '$elem' against '$schema_section->{$key}->{value}'");
+
+                    if ($elem =~ m/^$schema_section->{$key}->{value}$/){
+                        $self->explain(" ok.\n");
+                    }
+                    else{
+                        # XXX never reach this?
+                        $self->explain(" no.\n");
+                        $self->error("$elem does not match ^$schema_section->{$key}->{value}\$");
+                    }
+                }
             }
-            else{
-                # XXX never reach this?
-                $self->explain(" no.\n");
-                $self->error("$config_section->{$key} does not match ^$schema_section->{$key}->{value}\$");
+            else {
+               $self->explain(">>match '$config_section->{$key}' against '$schema_section->{$key}->{value}'");
+
+                if ($config_section->{$key} =~ m/^$schema_section->{$key}->{value}$/){
+                    $self->explain(" ok.\n");
+                }
+                else{
+                    # XXX never reach this?
+                    $self->explain(" no.\n");
+                    $self->error("$config_section->{$key} does not match ^$schema_section->{$key}->{value}\$");
+                }
             }
         }
         else{
