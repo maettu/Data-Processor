@@ -2,10 +2,12 @@ package Data::Processor;
 
 use strict;
 use 5.010_001;
-our $VERSION = '0.1.3';
+our $VERSION = '0.1.4';
 
 use Carp;
 use Data::Processor::Error::Collection;
+use Data::Processor::Validator;
+use Data::Processor::Transformer;
 
 =head1 NAME
 
@@ -57,7 +59,6 @@ already or be passed as an argument.
  my @errors = $processor->validate(schema=>$schema, data=>$data, verbose=>0);
 =cut
 sub validate{
-    require Data::Processor::Validator;
     my $self = shift;
     my %p    = @_;
 
@@ -84,7 +85,6 @@ module calls for you.
 
 =cut
 sub transform_data{
-    require Data::Processor::Transformer;
     die 'unimplemented';
     #XXX
 }

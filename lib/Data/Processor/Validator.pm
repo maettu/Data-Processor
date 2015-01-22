@@ -3,6 +3,7 @@ use strict;
 use warnings;
 package Data::Processor::Validator;
 use Data::Processor::Error::Collection;
+use Data::Processor::Transformer;
 
 use Carp;
 
@@ -22,6 +23,7 @@ sub new {
         depth       => $p{depth} // 0,
         indent      => $p{indent} // 4,
         parent_keys => $p{parent_keys} // ['root'],
+        transformer => Data::Processor::Transformer->new(),
 
     };
     bless ($self, $class);
@@ -67,27 +69,8 @@ sub _validate {
              and exists $schema_section->{$key}->{validator};
 
         # transformer
-        if (exists $schema_section->{$key}
-            and exists $schema_section->{$key}->{transformer}){
-
-            my $return_value;
-            eval {
-                local $SIG{__DIE__};
-                $return_value =
-                    $schema_section->{$key}->{transformer}
-                    ->($config_section->{$key},$config_section);
-
-            };
-            if (my $err = $@) {
-                if (ref $err eq 'HASH' and $err->{msg}){
-                    $err = $err->{msg};
-                }
-                $self->error("error transforming '$key': $err");
-            }
-            else {
-                $config_section->{$key} = $return_value;
-            }
-        }
+        $self->{transformer}
+                ->transform($schema_section, $config_section, $key, $self);
 
         my $descend_into;
         if (exists  $schema_section->{$key}
@@ -311,7 +294,7 @@ sub __validator_returns_undef {
     my $config_section = shift;
     my $schema_section = shift;
     $self->explain("running validator for '$key': $config_section->{$key}\n");
-    
+
     if (ref $config_section->{$key} eq ref []
         && exists $schema_section->{$key}->{array} && $schema_section->{$key}->{array}){
 
@@ -374,6 +357,7 @@ sub __value_is_valid{
                     }
                 }
             }
+            # XXX this was introduced to support arrays.
             else {
                $self->explain(">>match '$config_section->{$key}' against '$schema_section->{$key}->{value}'");
 
