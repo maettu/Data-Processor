@@ -59,13 +59,12 @@ sub _validate {
 
         # checks
         my $schema_key =
-            $self->_schema_key_to_check_against($key, %section) or next;
+            $self->_schema_twin_key($key, %section) or next;
         # from here we know to have a "twin" key $schema_key in the schema
 
         $self->__value_is_valid( $key, %section );
 
-        $self->__validator_returns_undef(
-            $key, $schema_key, $data_section, $schema_section);
+        $self->__validator_returns_undef($key, $schema_key, %section);
 
         # transformer
         my $e = $self->{transformer}
@@ -224,7 +223,7 @@ sub _check_mandatory_keys{
 }
 
 # called by _validate to check if a given key is defined in schema
-sub _schema_key_to_check_against{
+sub _schema_twin_key{
     my $self    = shift;
     my $key     = shift;
     my %section = @_;
@@ -266,20 +265,19 @@ sub _schema_key_to_check_against{
 
 # 'validator' specified gets this called to call the callback :-)
 sub __validator_returns_undef {
-    my $self           = shift;
-    my $key            = shift;
-    my $schema_key     = shift;
-    my $data_section   = shift;
-    my $schema_section = shift;
-    return unless $schema_section->{$schema_key}->{validator};
-    $self->explain("running validator for '$key': $data_section->{$key}\n");
+    my $self       = shift;
+    my $key        = shift;
+    my $schema_key = shift;
+    my %section    = @_;
+    return unless $section{schema}->{$schema_key}->{validator};
+    $self->explain("running validator for '$key': $section{data}->{$key}\n");
 
-    if (ref $data_section->{$key} eq ref []
-        && $schema_section->{$key}->{array}){
+    if (ref $section{data}->{$key} eq ref []
+        && $section{schema}->{$key}->{array}){
 
         my $counter = 0;
-        for my $elem (@{$data_section->{$key}}){
-            my $return_value = $schema_section->{$key}->{validator}->($elem, $data_section);
+        for my $elem (@{$section{data}->{$key}}){
+            my $return_value = $section{schema}->{$key}->{validator}->($elem, $section{data});
             if ($return_value){
                 $self->explain("validator error: $return_value (element $counter)\n");
                 $self->error("Execution of validator for '$key' element $counter returns with error: $return_value");
@@ -291,7 +289,7 @@ sub __validator_returns_undef {
         }
     }
     else {
-        my $return_value = $schema_section->{$key}->{validator}->($data_section->{$key}, $data_section);
+        my $return_value = $section{schema}->{$key}->{validator}->($section{data}->{$key}, $section{data});
         if ($return_value){
             $self->explain("validator error: $return_value\n");
             $self->error("Execution of validator for '$key' returns with error: $return_value");
