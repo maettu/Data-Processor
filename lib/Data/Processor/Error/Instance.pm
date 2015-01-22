@@ -21,7 +21,7 @@ sub new {
     my $class = shift;
     my $self = { @_ };
     my %keys  = ( map { $_ => 1 } keys %$self );
-    for (qw (message path caller)){
+    for (qw (message path)){
         delete $keys{$_};
         $self->{$_} // die "$_ missing";
     }
@@ -30,6 +30,11 @@ sub new {
     # keeping the array and store the message at its location
     $self->{path_array} = $self->{path};
     $self->{path} = join '->', @{$self->{path}};
+
+
+    my (undef, undef, $line) = caller(2);
+    my (undef, undef, undef, $sub) = caller(3);
+    $self->{caller} = "$sub line $line";
 
     bless ($self, $class);
     return $self;

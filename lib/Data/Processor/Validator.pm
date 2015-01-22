@@ -162,12 +162,9 @@ sub _validate {
 sub error {
     my $self = shift;
     my $string = shift;
-    my (undef, undef, $line) = caller(0);
-    my (undef, undef, undef, $sub) = caller(1);
     $self->{errors}->add(
         message => $string,
         path => $self->{parent_keys},
-        caller => "$sub line $line"
     );
 }
 
