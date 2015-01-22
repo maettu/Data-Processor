@@ -32,7 +32,10 @@ sub new {
 sub validate {
     my $self = shift;
     $self->{errors} = Data::Processor::Error::Collection->new();
-    $self->_validate($self->{data}, $self->{schema}, 'root');
+    $self->_validate($self->{data}, $self->{schema},
+    # XXX
+    data => $self->{data}, schema => $self->{schema});
+
     return $self->{errors};
 }
 
@@ -46,8 +49,10 @@ sub _validate {
     # (Only) in the first call, these are identical.
     my $data_section = shift;
     my $schema_section = shift;
+    my %section = @_;
+    die unless ($section{data} and $section{schema});
 
-    $self->_add_defaults($data_section, $schema_section);
+    $self->_add_defaults(%section);
 
     for my $key (keys %{$data_section}){
         $self->explain (">>'$key'");
@@ -95,7 +100,9 @@ sub _validate {
             $self->{depth}++;
             $self->_validate(
                 $data_section->{$key},
-                $schema_section->{$schema_key}->{members}
+                $schema_section->{$schema_key}->{members},
+                data => $data_section->{$key},
+                schema => $schema_section->{$schema_key}->{members}
             );
             pop @{$self->{parent_keys}};
             $self->{depth}--;
@@ -110,7 +117,9 @@ sub _validate {
             for my $member (@{$data_section->{$key}}){
                 $self->_validate(
                     $member,
-                    $schema_section->{$schema_key}->{members}
+                    $schema_section->{$schema_key}->{members},
+                    data => $member,
+                    schema => $schema_section->{$schema_key}->{members}
                 );
             }
             pop @{$self->{parent_keys}};
@@ -162,13 +171,14 @@ sub explain {
 
 sub _add_defaults{
     my $self           = shift;
-    my $data_section = shift;
-    my $schema_section = shift;
+    my %section = @_;
+    my $schema_section = $section{schema};
+    my $data_section   = $section{data};
 
-    for my $key (keys %{$schema_section}){
-        next unless $schema_section->{$key}->{default};
-        $data_section->{$key} = $schema_section->{$key}->{default}
-            unless $data_section->{$key};
+    for my $key (keys %{$section{schema}}){
+        next unless $section{schema}->{$key}->{default};
+        $section{data}->{$key} = $section{schema}->{$key}->{default}
+            unless $section{data}->{$key};
     }
 }
 

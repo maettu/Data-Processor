@@ -2,6 +2,7 @@ Revision history for Data-Processor
 
 {{$NEXT}}
     - no more "require"
+    - code cleanup
 
 0.1.5  2015-01-22 16:50:24 CET
     - Interface change: use positional parameters for $schema, $data
