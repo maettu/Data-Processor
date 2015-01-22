@@ -17,10 +17,9 @@ Data::Processor is a tool for transforming, verifying, and producing Perl data s
 
 ## new
 
-    my $processor = Data::Processor->new();
+    my $processor = Data::Processor->new($schema);
 
 optional parameters:
-\- schema: schema to validate against. Can also be specified later
 \- indent: count of spaces to insert when printing in verbose mode. Default 4
 \- depth: level at which to start. Default is 0.
 \- verbose: Set to a true value to print messages during processing.
@@ -29,7 +28,7 @@ optional parameters:
 Validate the data against a schema. The schema either needs to be present
 already or be passed as an argument.
 
-    my @errors = $processor->validate(schema=>$schema, data=>$data, verbose=>0);
+    my @errors = $processor->validate($data, verbose=>0);
 
 ## transform\_data
 
