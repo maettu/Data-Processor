@@ -3,18 +3,9 @@ use strict;
 use warnings;
 package Data::Processor::Error::Instance;
 
-=head1 NAME
-Data::Processor::Error::Instance - An Error
+# An error.
+# Always use throug Error::Collection to get correct caller info
 
-=head1 METHODS
-=head2 new
-
-  my $error = Data::Processor::Error::Instance->new(
-                message => 'This is an error.',
-                path    => 'root->key->another->key',
-                caller  => "got called by " . caller();
-            );
-=cut
 use overload ('""' => \&stringify);
 
 sub new {
@@ -39,12 +30,6 @@ sub new {
     bless ($self, $class);
     return $self;
 }
-
-=head2 stringify
-We 'use overload ('""' => \&stringify)' to call this routine when you
-print an error.
-Does not take arguments other than $self.
-=cut
 
 sub stringify {
     my $self = shift;
