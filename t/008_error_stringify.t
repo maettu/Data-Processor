@@ -12,7 +12,7 @@ my $data = {
 
 my $validator = Data::Processor->new($schema);
 
-my $error_collection = $validator->validate(data=>$data, verbose=>0);
+my $error_collection = $validator->validate($data, verbose=>0);
 
 ok ($error_collection->count==1, '1 error');
 

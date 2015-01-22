@@ -22,7 +22,7 @@ my $data = {
 
 my $p = Data::Processor->new($schema);
 
-my $error_collection = $p->validate(data=>$data, verbose=>0);
+my $error_collection = $p->validate($data, verbose=>0);
 
 ok ($error_collection->count==0, 'no errors');
 
@@ -32,7 +32,7 @@ $data = {
     }
 };
 
-$error_collection = $p->validate(data=>$data, verbose=>0);
+$error_collection = $p->validate($data, verbose=>0);
 
 ok ($error_collection->count==0, 'still no errors');
 

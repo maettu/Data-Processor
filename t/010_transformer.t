@@ -34,13 +34,13 @@ my $data = {
 };
 
 my $validator = Data::Processor->new($schema);
-my $error_collection = $validator->validate(data=>$data, verbose=>0);
+my $error_collection = $validator->validate($data, verbose=>0);
 ok ($data->{history} == 3600, 'transformed "1h" into "3600"');
 
 $data = {
     history => 'regards, your error :-)',
 };
-$error_collection = $validator->validate(data=>$data);
+$error_collection = $validator->validate($data);
 
 ok ($data->{history} eq 'regards, your error :-)',
     'Could not transform "regards, your error :-)"');

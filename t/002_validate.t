@@ -11,7 +11,7 @@ ok ($@ =~ /^cannot validate without "data"/, $@);
 
 
 my $data = data();
-my $error_collection = $processor->validate(data=>$data);
+my $error_collection = $processor->validate($data);
 my @errors = $error_collection->as_array();
 ok (scalar(@errors)==2, '2 errors found');
 ok ($error_collection->count()==2, 'error count =2');
@@ -58,7 +58,7 @@ $data = {
     },
     NOT_THERE => 'whatnot'
 };
-$error_collection = $processor->validate(data=>$data);
+$error_collection = $processor->validate($data);
 ok ($error_collection->count==0, 'no more errors with corrected config');
 use Data::Dumper; print Dumper $error_collection->as_array;
 
@@ -66,7 +66,7 @@ use Data::Dumper; print Dumper $error_collection->as_array;
 $data = {
 
 };
-$error_collection = $processor->validate(data=>$data);
+$error_collection = $processor->validate($data);
 ok ($error_collection->count==2, '2 errors');
 
 ok ($error_collection->any_error_contains(

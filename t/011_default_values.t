@@ -14,7 +14,7 @@ my $data = {};
 
 my $p = Data::Processor->new($schema);
 
-my $error_collection = $p->validate(data=>$data, verbose=>0);
+my $error_collection = $p->validate($data, verbose=>0);
 
 ok ($data->{key_with_default_value}==42,
     'key_with_default_value 42 inserted');

@@ -37,7 +37,7 @@ my $data = {
 
 my $p = Data::Processor->new($schema);
 
-my $error_collection = $p->validate(data => $data, verbose=>0);
+my $error_collection = $p->validate($data, verbose=>0);
 
 ok ($error_collection->count==3, '3 errors detected');
 

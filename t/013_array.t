@@ -57,7 +57,7 @@ my $data = {
 
 my $p = Data::Processor->new($schema);
 
-my $error_collection = $p->validate(data => $data, verbose=>0);
+my $error_collection = $p->validate($data, verbose=>0);
 
 # wrong array element will give 3 errors: 1 wrong key and 2 missing mandatory keys
 ok ($error_collection->count == 8, '8 errors detected');

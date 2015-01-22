@@ -56,15 +56,16 @@ sub new{
 Validate the data against a schema. The schema either needs to be present
 already or be passed as an argument.
 
- my @errors = $processor->validate(schema=>$schema, data=>$data, verbose=>0);
+ my @errors = $processor->validate($data, verbose=>0);
 =cut
 sub validate{
     my $self = shift;
+    my $data = shift;
     my %p    = @_;
 
     $self->{validator}=Data::Processor::Validator->new(
         schema      => $self->{schema} // $p{schema},
-        data        => $p{data} ,
+        data        => $data,
         verbose     => $p{verbose} // $self->{verbose} // undef,
         errors      => $self->{errors},
         depth       => $self->{depth},
