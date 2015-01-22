@@ -43,34 +43,34 @@ sub validate {
 sub _validate {
     my $self = shift;
     # $(word)_section are *not* the data fields but the sections of the
-    # config / schema the recursive algorithm is currently working on.
+    # data / schema the recursive algorithm is currently working on.
     # (Only) in the first call, these are identical.
-    my $config_section = shift;
+    my $data_section = shift;
     my $schema_section = shift;
 
-    $self->_add_defaults($config_section, $schema_section);
+    $self->_add_defaults($data_section, $schema_section);
 
-    for my $key (keys %{$config_section}){
+    for my $key (keys %{$data_section}){
         $self->explain (">>'$key'");
 
          # checks
         my $key_schema_to_descend_into =
             $self->__key_present_in_schema(
-                $key, $config_section, $schema_section
+                $key, $data_section, $schema_section
             );
 
         $self->__value_is_valid(
-            $key, $config_section, $schema_section
+            $key, $data_section, $schema_section
         );
 
         $self->__validator_returns_undef(
-            $key, $config_section, $schema_section
+            $key, $data_section, $schema_section
         ) if exists $schema_section->{$key}
              and exists $schema_section->{$key}->{validator};
 
         # transformer
         my $e = $self->{transformer}
-                ->transform($schema_section, $config_section, $key);
+                ->transform($schema_section, $data_section, $key);
         $self->error($e) if $e;
 
         my $descend_into;
@@ -80,7 +80,7 @@ sub _validate {
             $self->explain (
                 "skipping '$key' because schema explicitly says so.\n");
         }
-        # skip config branch if schema key is empty.
+        # skip data branch if schema key is empty.
         elsif (exists $schema_section->{$key}
                 and ! %{$schema_section->{$key}}){
             $self->explain (
@@ -98,27 +98,27 @@ sub _validate {
         }
 
         # recursion
-        if ((ref $config_section->{$key} eq ref {})
+        if ((ref $data_section->{$key} eq ref {})
                 and $descend_into){
             $self->explain (">>'$key' is not a leaf and we descend into it\n");
             push @{$self->{parent_keys}}, $key;
             $self->{depth}++;
             $self->_validate(
-                $config_section->{$key},
+                $data_section->{$key},
                 $schema_section->{$key_schema_to_descend_into}->{members}
             );
             # to undo push before entering recursion.
             pop @{$self->{parent_keys}};
             $self->{depth}--;
         }
-        elsif ((ref $config_section->{$key} eq ref []) && $descend_into
+        elsif ((ref $data_section->{$key} eq ref []) && $descend_into
             && exists $schema_section->{$key_schema_to_descend_into}->{array}
             && $schema_section->{$key_schema_to_descend_into}->{array}){
 
             $self->explain(">>'$key' is an array reference so we check all elements\n");
             push @{$self->{parent_keys}}, $key;
             $self->{depth}++;
-            for my $member (@{$config_section->{$key}}){
+            for my $member (@{$data_section->{$key}}){
                 $self->_validate(
                     $member,
                     $schema_section->{$key_schema_to_descend_into}->{members}
@@ -127,11 +127,11 @@ sub _validate {
             pop @{$self->{parent_keys}};
             $self->{depth}--;
         }
-        # Make sure that key in config is a leaf in schema.
-        # We cannot descend into a non-existing branch in config
+        # Make sure that key in data is a leaf in schema.
+        # We cannot descend into a non-existing branch in data
         # but it might be required by the schema.
         else {
-            $self->explain(">>checking config key '$key' which is a leaf..");
+            $self->explain(">>checking data key '$key' which is a leaf..");
             if ( $key_schema_to_descend_into
                     and
                  $schema_section->{$key_schema_to_descend_into}
@@ -154,7 +154,7 @@ sub _validate {
     # this is only done on this level.
     # Otherwise "mandatory" inherited "upwards".
     $self->_check_mandatory_keys(
-        $config_section, $schema_section
+        $data_section, $schema_section
     );
 
 }
@@ -180,27 +180,27 @@ sub explain {
 
 
 # add defaults. Go over all keys *on that level* and if there is not
-# a value (or, most oftenly, a key) in config, add the key and the
+# a value (or, most oftenly, a key) in data, add the key and the
 # default value.
 
 sub _add_defaults{
     my $self           = shift;
-    my $config_section = shift;
+    my $data_section = shift;
     my $schema_section = shift;
 
     for my $key (keys %{$schema_section}){
         next unless exists $schema_section->{$key}->{default};
-        $config_section->{$key} = $schema_section->{$key}->{default}
-            unless $config_section->{$key};
+        $data_section->{$key} = $schema_section->{$key}->{default}
+            unless $data_section->{$key};
     }
 }
 
 # check mandatory: look for mandatory fields in all hashes 1 level
 # below current level (in schema)
-# for each check if $config has a key.
+# for each check if $data has a key.
 sub _check_mandatory_keys{
     my $self = shift;
-    my $config_section = shift;
+    my $data_section = shift;
     my $schema_section = shift;
 
     for my $key (keys %{$schema_section}){
@@ -209,16 +209,16 @@ sub _check_mandatory_keys{
                    and $schema_section->{$key}->{optional}){
 
             $self->explain("true\n");
-            next if exists $config_section->{$key};
+            next if exists $data_section->{$key};
 
             # regex-keys never directly occur.
             if (exists $schema_section->{$key}->{regex}
                    and $schema_section->{$key}->{regex}){
                 $self->explain(">>regex enabled key found. ");
-                $self->explain("Checking config keys.. ");
+                $self->explain("Checking data keys.. ");
                 my $c = 0;
                 # look which keys match the regex
-                for my $c_key (keys %{$config_section}){
+                for my $c_key (keys %{$data_section}){
                     $c++ if $c_key =~ /$key/;
                 }
                 $self->explain("$c matching occurencies found\n");
@@ -245,7 +245,7 @@ sub _check_mandatory_keys{
 sub __key_present_in_schema{
     my $self = shift;
     my $key            = shift;
-    my $config_section = shift;
+    my $data_section = shift;
     my $schema_section = shift;
 
     my $key_schema_to_descend_into;
@@ -288,16 +288,16 @@ sub __key_present_in_schema{
 sub __validator_returns_undef {
     my $self = shift;
     my $key    = shift;
-    my $config_section = shift;
+    my $data_section = shift;
     my $schema_section = shift;
-    $self->explain("running validator for '$key': $config_section->{$key}\n");
+    $self->explain("running validator for '$key': $data_section->{$key}\n");
 
-    if (ref $config_section->{$key} eq ref []
+    if (ref $data_section->{$key} eq ref []
         && exists $schema_section->{$key}->{array} && $schema_section->{$key}->{array}){
 
         my $counter = 0;
-        for my $elem (@{$config_section->{$key}}){
-            my $return_value = $schema_section->{$key}->{validator}->($elem, $config_section);
+        for my $elem (@{$data_section->{$key}}){
+            my $return_value = $schema_section->{$key}->{validator}->($elem, $data_section);
             if ($return_value){
                 $self->explain("validator error: $return_value (element $counter)\n");
                 $self->error("Execution of validator for '$key' element $counter returns with error: $return_value");
@@ -309,7 +309,7 @@ sub __validator_returns_undef {
         }
     }
     else {
-        my $return_value = $schema_section->{$key}->{validator}->($config_section->{$key}, $config_section);
+        my $return_value = $schema_section->{$key}->{validator}->($data_section->{$key}, $data_section);
         if ($return_value){
             $self->explain("validator error: $return_value\n");
             $self->error("Execution of validator for '$key' returns with error: $return_value");
@@ -325,7 +325,7 @@ sub __validator_returns_undef {
 sub __value_is_valid{
     my $self = shift;
     my $key    = shift;
-    my $config_section = shift;
+    my $data_section = shift;
     my $schema_section = shift;
 
     if (exists  $schema_section->{$key}
@@ -338,10 +338,10 @@ sub __value_is_valid{
             # possibly never implement this because of new "validator"
         }
         elsif (ref($schema_section->{$key}->{value}) eq 'Regexp'){
-            if (ref $config_section->{$key} eq ref []
+            if (ref $data_section->{$key} eq ref []
                 && exists $schema_section->{$key}->{array} && $schema_section->{$key}->{array}){
 
-                for my $elem (@{$config_section->{$key}}){
+                for my $elem (@{$data_section->{$key}}){
                     $self->explain(">>match '$elem' against '$schema_section->{$key}->{value}'");
 
                     if ($elem =~ m/^$schema_section->{$key}->{value}$/){
@@ -356,15 +356,15 @@ sub __value_is_valid{
             }
             # XXX this was introduced to support arrays.
             else {
-               $self->explain(">>match '$config_section->{$key}' against '$schema_section->{$key}->{value}'");
+               $self->explain(">>match '$data_section->{$key}' against '$schema_section->{$key}->{value}'");
 
-                if ($config_section->{$key} =~ m/^$schema_section->{$key}->{value}$/){
+                if ($data_section->{$key} =~ m/^$schema_section->{$key}->{value}$/){
                     $self->explain(" ok.\n");
                 }
                 else{
                     # XXX never reach this?
                     $self->explain(" no.\n");
-                    $self->error("$config_section->{$key} does not match ^$schema_section->{$key}->{value}\$");
+                    $self->error("$data_section->{$key} does not match ^$schema_section->{$key}->{value}\$");
                 }
             }
         }
