@@ -33,7 +33,7 @@ my $data = {
     history => '1h',
 };
 
-my $validator = Data::Processor->new(schema=>$schema);
+my $validator = Data::Processor->new($schema);
 my $error_collection = $validator->validate(data=>$data, verbose=>0);
 ok ($data->{history} == 3600, 'transformed "1h" into "3600"');
 

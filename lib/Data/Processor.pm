@@ -2,7 +2,7 @@ package Data::Processor;
 
 use strict;
 use 5.010_001;
-our $VERSION = '0.1.4';
+our $VERSION = '0.1.5';
 
 use Carp;
 use Data::Processor::Error::Collection;
@@ -28,20 +28,20 @@ Data::Processor is a tool for transforming, verifying, and producing Perl data s
 
 =head2 new
 
- my $processor = Data::Processor->new();
+ my $processor = Data::Processor->new($schema);
 
 optional parameters:
-- schema: schema to validate against. Can also be specified later
 - indent: count of spaces to insert when printing in verbose mode. Default 4
 - depth: level at which to start. Default is 0.
 - verbose: Set to a true value to print messages during processing.
 
 =cut
 sub new{
-    my $class = shift;
+    my $class  = shift;
+    my $schema = shift;
     my %p     = @_;
     my $self = {
-        schema      => $p{schema} // undef,
+        schema      => $schema,
         errors      => Data::Processor::Error::Collection->new(),
         depth       => $p{depth}  // 0,
         indent      => $p{indent} // 4,

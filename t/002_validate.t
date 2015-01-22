@@ -3,21 +3,12 @@ use lib 'lib';
 use Test::More;
 use Data::Processor;
 
-my $processor_without_schema = Data::Processor->new();
-
-eval{$processor_without_schema->validate()};
-chomp $@;
-ok ($@ =~ /^cannot validate without "schema"/, $@);
-
 my $schema = schema();
-eval{$processor_without_schema->validate(schema=>$schema)};
-chomp $@;
-ok ($@ =~ /^cannot validate without "data"/, $@);
-
-my $processor = Data::Processor->new(schema => $schema);
+my $processor = Data::Processor->new($schema);
 eval{$processor->validate()};
 chomp $@;
 ok ($@ =~ /^cannot validate without "data"/, $@);
+
 
 my $data = data();
 my $error_collection = $processor->validate(data=>$data);

@@ -55,7 +55,7 @@ my $data = {
     simplearrayval => [0, 'fail', 2, 3, 4],
 };
 
-my $p = Data::Processor->new(schema => $schema);
+my $p = Data::Processor->new($schema);
 
 my $error_collection = $p->validate(data => $data, verbose=>0);
 

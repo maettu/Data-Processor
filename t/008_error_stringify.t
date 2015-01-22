@@ -10,7 +10,7 @@ my $data = {
 };
 
 
-my $validator = Data::Processor->new(schema=>$schema);
+my $validator = Data::Processor->new($schema);
 
 my $error_collection = $validator->validate(data=>$data, verbose=>0);
 

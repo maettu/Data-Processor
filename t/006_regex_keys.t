@@ -35,7 +35,7 @@ my $data = {
     bar => 'empty'
 };
 
-my $p = Data::Processor->new(schema => $schema);
+my $p = Data::Processor->new($schema);
 
 my $error_collection = $p->validate(data => $data, verbose=>0);
 

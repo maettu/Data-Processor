@@ -31,7 +31,7 @@ my $schema = {
     }
 };
 
-my $p = Data::Processor->new(schema => $schema);
+my $p = Data::Processor->new($schema);
 
 my $data = {
     section => {

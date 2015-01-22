@@ -15,7 +15,6 @@ sub new {
     my $class = shift;
     my %p     = @_;
     my $self = {
-                             # XXX or can we? Assume nothing about schema..
         schema => $p{schema}  // croak ('cannot validate without "schema"'),
         data   => $p{data}    // croak ('cannot validate without "data"'),
         verbose=> $p{verbose} // undef,
