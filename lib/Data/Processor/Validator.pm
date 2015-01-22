@@ -69,8 +69,9 @@ sub _validate {
              and exists $schema_section->{$key}->{validator};
 
         # transformer
-        $self->{transformer}
-                ->transform($schema_section, $config_section, $key, $self);
+        my $e = $self->{transformer}
+                ->transform($schema_section, $config_section, $key);
+        $self->error($e) if $e;
 
         my $descend_into;
         if (exists  $schema_section->{$key}

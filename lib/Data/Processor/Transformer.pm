@@ -24,8 +24,6 @@ sub transform{
     my $schema_section = shift;
     my $data_section   = shift;
     my $key            = shift;
-    # XXX not nice. Need this atm for accessing the error method of D::P::V
-    my $caller         = shift;
 
     if (exists $schema_section->{$key}
         and exists $schema_section->{$key}->{transformer}){
@@ -42,7 +40,7 @@ sub transform{
             if (ref $err eq 'HASH' and $err->{msg}){
                 $err = $err->{msg};
             }
-            $caller->error("error transforming '$key': $err");
+            return "error transforming '$key': $err";
         }
         else {
             $data_section->{$key} = $return_value;
