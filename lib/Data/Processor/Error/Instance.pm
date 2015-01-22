@@ -26,6 +26,11 @@ sub new {
         $self->{$_} // die "$_ missing";
     }
     die "Unknown keys ". join (",",keys %keys) if keys %keys;
+
+    # keeping the array and store the message at its location
+    $self->{path_array} = $self->{path};
+    $self->{path} = join '->', @{$self->{path}};
+
     bless ($self, $class);
     return $self;
 }
@@ -38,7 +43,7 @@ Does not take arguments other than $self.
 
 sub stringify {
     my $self = shift;
-    return $self->{path} . ": " . $self->{message};
+    return $self->{path}. ": " . $self->{message};
 }
 
 1;
