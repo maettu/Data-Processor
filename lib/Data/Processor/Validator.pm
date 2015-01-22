@@ -53,19 +53,15 @@ sub _validate {
         $self->explain (">>'$key'");
 
         # checks
-        my $key_schema_to_descend_into =
-            $self->__key_present_in_schema(
-                $key, $data_section, $schema_section
-            );
+        my $schema_key =
+            $self->_schema_key_to_check_against(
+                $key, $data_section, $schema_section) or next;
+        # from here we know to have a "twin" key $schema_key in the schema
 
-        $self->__value_is_valid(
-            $key, $data_section, $schema_section
-        );
+        $self->__value_is_valid( $key, $data_section, $schema_section );
 
         $self->__validator_returns_undef(
-            $key, $data_section, $schema_section
-        ) if $schema_section->{$key}
-             and $schema_section->{$key}->{validator};
+            $key, $schema_key, $data_section, $schema_section);
 
         # transformer
         my $e = $self->{transformer}
@@ -73,19 +69,15 @@ sub _validate {
         $self->error($e) if $e;
 
         my $descend_into;
-        if ($schema_section->{$key}
-                and $schema_section->{$key}->{no_descend_into}){
+        if ($schema_section->{$schema_key}->{no_descend_into}){
             $self->explain (
                 "skipping '$key' because schema explicitly says so.\n");
         }
         # skip data branch if schema key is empty.
-        elsif ($schema_section->{$key}
-                and ! %{$schema_section->{$key}}){
-            $self->explain (
-                "skipping '$key' because schema key is empty'");
+        elsif (! %{$schema_section->{$schema_key}}){
+            $self->explain ("skipping '$key' because schema key is empty'");
         }
-        elsif ($schema_section->{$key}
-                and ! $schema_section->{$key}->{members}){
+        elsif (! $schema_section->{$schema_key}->{members}){
             $self->explain (
                 "not descending into '$key'. No members specified\n"
             );
@@ -96,29 +88,29 @@ sub _validate {
         }
 
         # recursion
-        if ((ref $data_section->{$key} eq ref {})
-                and $descend_into){
-            $self->explain (">>'$key' is not a leaf and we descend into it\n");
+        if ((ref $data_section->{$key} eq ref {}) and $descend_into){
+            $self->explain
+                (">>'$key' is not a leaf and we descend into it\n");
             push @{$self->{parent_keys}}, $key;
             $self->{depth}++;
             $self->_validate(
                 $data_section->{$key},
-                $schema_section->{$key_schema_to_descend_into}->{members}
+                $schema_section->{$schema_key}->{members}
             );
-            # to undo push before entering recursion.
             pop @{$self->{parent_keys}};
             $self->{depth}--;
         }
         elsif ((ref $data_section->{$key} eq ref []) && $descend_into
-            && $schema_section->{$key_schema_to_descend_into}->{array}){
+            && $schema_section->{$schema_key}->{array}){
 
-            $self->explain(">>'$key' is an array reference so we check all elements\n");
+            $self->explain(
+              ">>'$key' is an array reference so we check all elements\n");
             push @{$self->{parent_keys}}, $key;
             $self->{depth}++;
             for my $member (@{$data_section->{$key}}){
                 $self->_validate(
                     $member,
-                    $schema_section->{$key_schema_to_descend_into}->{members}
+                    $schema_section->{$schema_key}->{members}
                 );
             }
             pop @{$self->{parent_keys}};
@@ -129,14 +121,7 @@ sub _validate {
         # but it might be required by the schema.
         else {
             $self->explain(">>checking data key '$key' which is a leaf..");
-            if ( $key_schema_to_descend_into
-                    and
-                $schema_section->{$key_schema_to_descend_into}
-                    and
-                ref $schema_section->{$key_schema_to_descend_into} eq ref {}
-                    and
-                $schema_section->{$key_schema_to_descend_into}->{members}
-            ){
+            if ($schema_section->{$schema_key}->{members}){
                 $self->explain("but schema requires members.\n");
                 $self->error("'$key' should have members");
             }
@@ -144,16 +129,11 @@ sub _validate {
                 $self->explain("schema key is also a leaf. ok.\n");
             }
         }
-
-
     }
      # look for missing non-optional keys in schema
     # this is only done on this level.
     # Otherwise "mandatory" inherited "upwards".
-    $self->_check_mandatory_keys(
-        $data_section, $schema_section
-    );
-
+    $self->_check_mandatory_keys( $data_section, $schema_section);
 }
 
 # add an error
@@ -237,18 +217,18 @@ sub _check_mandatory_keys{
 }
 
 # called by _validate to check if a given key is defined in schema
-sub __key_present_in_schema{
-    my $self = shift;
+sub _schema_key_to_check_against{
+    my $self           = shift;
     my $key            = shift;
-    my $data_section = shift;
+    my $data_section   = shift;
     my $schema_section = shift;
 
-    my $key_schema_to_descend_into;
+    my $schema_key;
 
     # direct match: exact declaration
     if ($schema_section->{$key}){
         $self->explain(" ok\n");
-        $key_schema_to_descend_into = $key;
+        $schema_key = $key;
     }
     # match against a pattern
     else {
@@ -262,28 +242,30 @@ sub __key_present_in_schema{
 
             if ($key =~ /$match_key/){
                 $self->explain("'$key' matches $match_key\n");
-                $key_schema_to_descend_into = $match_key;
+                $schema_key = $match_key;
             }
         }
     }
 
-    # if $key_schema_to_descend_into is still undef we were unable to
+    # if $schema_key is still undef we were unable to
     # match it against a key in the schema.
-    unless ($key_schema_to_descend_into){
+    unless ($schema_key){
         $self->explain(">>$key not in schema, keys available: ");
         $self->explain(join (", ", (keys %{$schema_section})));
         $self->explain("\n");
         $self->error("key '$key' not found in schema\n");
     }
-    return $key_schema_to_descend_into
+    return $schema_key
 }
 
 # 'validator' specified gets this called to call the callback :-)
 sub __validator_returns_undef {
-    my $self = shift;
-    my $key    = shift;
-    my $data_section = shift;
+    my $self           = shift;
+    my $key            = shift;
+    my $schema_key     = shift;
+    my $data_section   = shift;
     my $schema_section = shift;
+    return unless $schema_section->{$schema_key}->{validator};
     $self->explain("running validator for '$key': $data_section->{$key}\n");
 
     if (ref $data_section->{$key} eq ref []
