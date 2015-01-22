@@ -59,11 +59,10 @@ sub _validate {
 
         # checks
         my $schema_key =
-            $self->_schema_key_to_check_against(
-                $key, $data_section, $schema_section) or next;
+            $self->_schema_key_to_check_against($key, %section) or next;
         # from here we know to have a "twin" key $schema_key in the schema
 
-        $self->__value_is_valid( $key, $data_section, $schema_section );
+        $self->__value_is_valid( $key, %section );
 
         $self->__validator_returns_undef(
             $key, $schema_key, $data_section, $schema_section);
@@ -172,8 +171,6 @@ sub explain {
 sub _add_defaults{
     my $self           = shift;
     my %section = @_;
-    my $schema_section = $section{schema};
-    my $data_section   = $section{data};
 
     for my $key (keys %{$section{schema}}){
         next unless $section{schema}->{$key}->{default};
@@ -228,27 +225,26 @@ sub _check_mandatory_keys{
 
 # called by _validate to check if a given key is defined in schema
 sub _schema_key_to_check_against{
-    my $self           = shift;
-    my $key            = shift;
-    my $data_section   = shift;
-    my $schema_section = shift;
+    my $self    = shift;
+    my $key     = shift;
+    my %section = @_;
 
     my $schema_key;
 
     # direct match: exact declaration
-    if ($schema_section->{$key}){
+    if ($section{schema}->{$key}){
         $self->explain(" ok\n");
         $schema_key = $key;
     }
     # match against a pattern
     else {
         my $match;
-        for my $match_key (keys %{$schema_section}){
+        for my $match_key (keys %{$section{schema}}){
 
             # only try to match a key if it has the property
             # _regex_ set
-            next unless exists $schema_section->{$match_key}
-                           and $schema_section->{$match_key}->{regex};
+            next unless exists $section{schema}->{$match_key}
+                           and $section{schema}->{$match_key}->{regex};
 
             if ($key =~ /$match_key/){
                 $self->explain("'$key' matches $match_key\n");
@@ -261,7 +257,7 @@ sub _schema_key_to_check_against{
     # match it against a key in the schema.
     unless ($schema_key){
         $self->explain(">>$key not in schema, keys available: ");
-        $self->explain(join (", ", (keys %{$schema_section})));
+        $self->explain(join (", ", (keys %{$section{schema}})));
         $self->explain("\n");
         $self->error("key '$key' not found in schema\n");
     }
@@ -309,48 +305,47 @@ sub __validator_returns_undef {
 # called by _validate to check if a value is in line with definitions
 # in the schema.
 sub __value_is_valid{
-    my $self = shift;
-    my $key    = shift;
-    my $data_section = shift;
-    my $schema_section = shift;
+    my $self    = shift;
+    my $key     = shift;
+    my %section = @_;
 
-    if (exists  $schema_section->{$key}
-            and $schema_section->{$key}->{value}){
-        $self->explain('>>'.ref($schema_section->{$key}->{value})."\n");
+    if (exists  $section{schema}->{$key}
+            and $section{schema}->{$key}->{value}){
+        $self->explain('>>'.ref($section{schema}->{$key}->{value})."\n");
 
         # currently, 2 type of restrictions are supported:
         # (callback) code and regex
-        if (ref($schema_section->{$key}->{value}) eq 'CODE'){
+        if (ref($section{schema}->{$key}->{value}) eq 'CODE'){
             # possibly never implement this because of new "validator"
         }
-        elsif (ref($schema_section->{$key}->{value}) eq 'Regexp'){
-            if (ref $data_section->{$key} eq ref []
-                && $schema_section->{$key}->{array}){
+        elsif (ref($section{schema}->{$key}->{value}) eq 'Regexp'){
+            if (ref $section{data}->{$key} eq ref []
+                && $section{schema}->{$key}->{array}){
 
-                for my $elem (@{$data_section->{$key}}){
-                    $self->explain(">>match '$elem' against '$schema_section->{$key}->{value}'");
+                for my $elem (@{$section{data}->{$key}}){
+                    $self->explain(">>match '$elem' against '$section{schema}->{$key}->{value}'");
 
-                    if ($elem =~ m/^$schema_section->{$key}->{value}$/){
+                    if ($elem =~ m/^$section{schema}->{$key}->{value}$/){
                         $self->explain(" ok.\n");
                     }
                     else{
                         # XXX never reach this?
                         $self->explain(" no.\n");
-                        $self->error("$elem does not match ^$schema_section->{$key}->{value}\$");
+                        $self->error("$elem does not match ^$section{schema}->{$key}->{value}\$");
                     }
                 }
             }
             # XXX this was introduced to support arrays.
             else {
-               $self->explain(">>match '$data_section->{$key}' against '$schema_section->{$key}->{value}'");
+               $self->explain(">>match '$section{data}->{$key}' against '$section{schema}->{$key}->{value}'");
 
-                if ($data_section->{$key} =~ m/^$schema_section->{$key}->{value}$/){
+                if ($section{data}->{$key} =~ m/^$section{schema}->{$key}->{value}$/){
                     $self->explain(" ok.\n");
                 }
                 else{
                     # XXX never reach this?
                     $self->explain(" no.\n");
-                    $self->error("$data_section->{$key} does not match ^$schema_section->{$key}->{value}\$");
+                    $self->error("$section{data}->{$key} does not match ^$section{schema}->{$key}->{value}\$");
                 }
             }
         }
