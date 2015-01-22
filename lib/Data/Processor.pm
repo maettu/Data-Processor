@@ -2,12 +2,14 @@ package Data::Processor;
 
 use strict;
 use 5.010_001;
-our $VERSION = '0.1.5';
+our $VERSION = '0.1.6';
 
 use Carp;
 use Data::Processor::Error::Collection;
 use Data::Processor::Validator;
 use Data::Processor::Transformer;
+use Data::Processor::Generator;
+use Data::Processor::PodWriter;
 
 =head1 NAME
 
@@ -98,7 +100,6 @@ UNIMPLEMENTED
 
 =cut
 sub transform_schema{
-    require Data::Processor::Transformer;
     die 'unimplemented';
     # XXX
 }
@@ -111,7 +112,6 @@ UNIMPLEMENTED
 
 =cut
 sub make_data{
-    require Data::Processor::Generator;
     die 'unimplemented';
     # XXX
 }
@@ -124,7 +124,6 @@ UNIMPLEMENTED
 
 =cut
 sub make_pod{
-    require Data::Processor::PodWriter;
     die 'unimplemented';
     # XXX
 }
