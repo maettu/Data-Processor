@@ -47,14 +47,12 @@ sub _validate {
     # $(word)_section are *not* the data fields but the sections of the
     # data / schema the recursive algorithm is currently working on.
     # (Only) in the first call, these are identical.
-    my $data_section = shift;
-    my $schema_section = shift;
     my %section = @_;
     die unless ($section{data} and $section{schema});
 
     $self->_add_defaults(%section);
 
-    for my $key (keys %{$data_section}){
+    for my $key (keys %{$section{data}}){
         $self->explain (">>'$key'");
 
         # checks
