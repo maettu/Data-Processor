@@ -1,6 +1,8 @@
 Revision history for Data-Processor
 
 {{$NEXT}}
+
+0.1.4  2015-01-22 16:22:30 CET
     - array support as of t/013_array.t 
     - Transformer object
     - Error::Instance handles more
