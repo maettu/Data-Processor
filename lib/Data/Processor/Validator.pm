@@ -52,7 +52,7 @@ sub _validate {
     for my $key (keys %{$data_section}){
         $self->explain (">>'$key'");
 
-         # checks
+        # checks
         my $key_schema_to_descend_into =
             $self->__key_present_in_schema(
                 $key, $data_section, $schema_section
@@ -64,8 +64,8 @@ sub _validate {
 
         $self->__validator_returns_undef(
             $key, $data_section, $schema_section
-        ) if exists $schema_section->{$key}
-             and exists $schema_section->{$key}->{validator};
+        ) if $schema_section->{$key}
+             and $schema_section->{$key}->{validator};
 
         # transformer
         my $e = $self->{transformer}
@@ -73,20 +73,19 @@ sub _validate {
         $self->error($e) if $e;
 
         my $descend_into;
-        if (exists  $schema_section->{$key}
-                and $schema_section->{$key}->{no_descend_into}
+        if ($schema_section->{$key}
                 and $schema_section->{$key}->{no_descend_into}){
             $self->explain (
                 "skipping '$key' because schema explicitly says so.\n");
         }
         # skip data branch if schema key is empty.
-        elsif (exists $schema_section->{$key}
+        elsif ($schema_section->{$key}
                 and ! %{$schema_section->{$key}}){
             $self->explain (
                 "skipping '$key' because schema key is empty'");
         }
-        elsif (exists $schema_section->{$key}
-                and ! exists $schema_section->{$key}->{members}){
+        elsif ($schema_section->{$key}
+                and ! $schema_section->{$key}->{members}){
             $self->explain (
                 "not descending into '$key'. No members specified\n"
             );
@@ -111,7 +110,6 @@ sub _validate {
             $self->{depth}--;
         }
         elsif ((ref $data_section->{$key} eq ref []) && $descend_into
-            && exists $schema_section->{$key_schema_to_descend_into}->{array}
             && $schema_section->{$key_schema_to_descend_into}->{array}){
 
             $self->explain(">>'$key' is an array reference so we check all elements\n");
@@ -133,11 +131,11 @@ sub _validate {
             $self->explain(">>checking data key '$key' which is a leaf..");
             if ( $key_schema_to_descend_into
                     and
-                 $schema_section->{$key_schema_to_descend_into}
+                $schema_section->{$key_schema_to_descend_into}
                     and
                 ref $schema_section->{$key_schema_to_descend_into} eq ref {}
                     and
-                exists $schema_section->{$key_schema_to_descend_into}->{members}
+                $schema_section->{$key_schema_to_descend_into}->{members}
             ){
                 $self->explain("but schema requires members.\n");
                 $self->error("'$key' should have members");
@@ -188,7 +186,7 @@ sub _add_defaults{
     my $schema_section = shift;
 
     for my $key (keys %{$schema_section}){
-        next unless exists $schema_section->{$key}->{default};
+        next unless $schema_section->{$key}->{default};
         $data_section->{$key} = $schema_section->{$key}->{default}
             unless $data_section->{$key};
     }
@@ -204,15 +202,14 @@ sub _check_mandatory_keys{
 
     for my $key (keys %{$schema_section}){
         $self->explain(">>Checking if '$key' is mandatory: ");
-        unless (exists $schema_section->{$key}->{optional}
+        unless ($schema_section->{$key}->{optional}
                    and $schema_section->{$key}->{optional}){
 
             $self->explain("true\n");
-            next if exists $data_section->{$key};
+            next if $data_section->{$key};
 
             # regex-keys never directly occur.
-            if (exists $schema_section->{$key}->{regex}
-                   and $schema_section->{$key}->{regex}){
+            if ($schema_section->{$key}->{regex}){
                 $self->explain(">>regex enabled key found. ");
                 $self->explain("Checking data keys.. ");
                 my $c = 0;
@@ -223,15 +220,14 @@ sub _check_mandatory_keys{
                 $self->explain("$c matching occurencies found\n");
                 next if $c > 0;
             }
-            next if exists $schema_section->{$key}->{array}
-                && $schema_section->{$key}->{array};
+            next if $schema_section->{$key}->{array};
 
 
             # should only get here in case of error.
 
             my $error_msg = '';
             $error_msg = $schema_section->{$key}->{error_msg}
-                if exists $schema_section->{$key}->{error_msg};
+                if $schema_section->{$key}->{error_msg};
             $self->error("mandatory key '$key' missing. Error msg: '$error_msg'");
         }
         else{
@@ -250,7 +246,7 @@ sub __key_present_in_schema{
     my $key_schema_to_descend_into;
 
     # direct match: exact declaration
-    if (exists $schema_section->{$key}){
+    if ($schema_section->{$key}){
         $self->explain(" ok\n");
         $key_schema_to_descend_into = $key;
     }
@@ -262,7 +258,6 @@ sub __key_present_in_schema{
             # only try to match a key if it has the property
             # _regex_ set
             next unless exists $schema_section->{$match_key}
-                    and exists $schema_section->{$match_key}->{regex}
                            and $schema_section->{$match_key}->{regex};
 
             if ($key =~ /$match_key/){
@@ -292,7 +287,7 @@ sub __validator_returns_undef {
     $self->explain("running validator for '$key': $data_section->{$key}\n");
 
     if (ref $data_section->{$key} eq ref []
-        && exists $schema_section->{$key}->{array} && $schema_section->{$key}->{array}){
+        && $schema_section->{$key}->{array}){
 
         my $counter = 0;
         for my $elem (@{$data_section->{$key}}){
@@ -338,7 +333,7 @@ sub __value_is_valid{
         }
         elsif (ref($schema_section->{$key}->{value}) eq 'Regexp'){
             if (ref $data_section->{$key} eq ref []
-                && exists $schema_section->{$key}->{array} && $schema_section->{$key}->{array}){
+                && $schema_section->{$key}->{array}){
 
                 for my $elem (@{$data_section->{$key}}){
                     $self->explain(">>match '$elem' against '$schema_section->{$key}->{value}'");
