@@ -20,20 +20,19 @@ sub new {
 }
 
 sub transform{
-    my $self           = shift;
-    my $schema_section = shift;
-    my $data_section   = shift;
-    my $key            = shift;
+    my $self    = shift;
+    my $key     = shift;
+    my %section = @_;
 
-    if (exists $schema_section->{$key}
-        and exists $schema_section->{$key}->{transformer}){
+    if (exists $section{schema}->{$key}
+        and exists $section{schema}->{$key}->{transformer}){
 
         my $return_value;
         eval {
             local $SIG{__DIE__};
             $return_value =
-                $schema_section->{$key}->{transformer}
-                ->($data_section->{$key},$data_section);
+                $section{schema}->{$key}->{transformer}
+                ->($section{data}->{$key},$section{data});
 
         };
         if (my $err = $@) {
@@ -43,7 +42,7 @@ sub transform{
             return "error transforming '$key': $err";
         }
         else {
-            $data_section->{$key} = $return_value;
+            $section{data}->{$key} = $return_value;
         }
     }
 }

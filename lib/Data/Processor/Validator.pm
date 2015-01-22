@@ -67,8 +67,7 @@ sub _validate {
         $self->__validator_returns_undef($key, $schema_key, %section);
 
         # transformer
-        my $e = $self->{transformer}
-                ->transform($schema_section, $data_section, $key);
+        my $e = $self->{transformer}->transform($key, %section);
         $self->error($e) if $e;
 
         my $descend_into;
