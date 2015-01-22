@@ -66,71 +66,74 @@ sub _validate {
         my $e = $self->{transformer}->transform($key, %section);
         $self->error($e) if $e;
 
+        # skip if explicitly asked for
         if ($section{schema}->{$schema_key}->{no_descend_into}){
             $self->explain (
                 "skipping '$key' because schema explicitly says so.\n");
+            next;
         }
         # skip data branch if schema key is empty.
-        elsif (! %{$section{schema}->{$schema_key}}){
+        if (! %{$section{schema}->{$schema_key}}){
             $self->explain ("skipping '$key' because schema key is empty'");
+            next;
         }
-        elsif (! $section{schema}->{$schema_key}->{members}){
+        if (! $section{schema}->{$schema_key}->{members}){
             $self->explain (
                 "not descending into '$key'. No members specified\n"
             );
+            next;
         }
-        else{
-            $self->explain (">>descending into '$key'\n");
 
-            # recursion
-            if (ref $section{data}->{$key} eq ref {} ){
-                $self->explain
-                    (">>'$key' is not a leaf and we descend into it\n");
-                push @{$self->{parent_keys}}, $key;
-                $self->{depth}++;
+        # recursion if we reach this point.
+        $self->explain (">>descending into '$key'\n");
+
+        if (ref $section{data}->{$key} eq ref {} ){
+            $self->explain
+                (">>'$key' is not a leaf and we descend into it\n");
+            push @{$self->{parent_keys}}, $key;
+            $self->{depth}++;
+            $self->_validate(
+                $section{data}->{$key},
+                $section{schema}->{$schema_key}->{members},
+                data => $section{data}->{$key},
+                schema => $section{schema}->{$schema_key}->{members}
+            );
+            pop @{$self->{parent_keys}};
+            $self->{depth}--;
+        }
+        elsif ((ref $section{data}->{$key} eq ref [])
+            && $section{schema}->{$schema_key}->{array}){
+
+            $self->explain(
+            ">>'$key' is an array reference so we check all elements\n");
+            push @{$self->{parent_keys}}, $key;
+            $self->{depth}++;
+            for my $member (@{$section{data}->{$key}}){
                 $self->_validate(
-                    $section{data}->{$key},
+                    $member,
                     $section{schema}->{$schema_key}->{members},
-                    data => $section{data}->{$key},
+                    data => $member,
                     schema => $section{schema}->{$schema_key}->{members}
                 );
-                pop @{$self->{parent_keys}};
-                $self->{depth}--;
             }
-            elsif ((ref $section{data}->{$key} eq ref [])
-                && $section{schema}->{$schema_key}->{array}){
-
-                $self->explain(
-                ">>'$key' is an array reference so we check all elements\n");
-                push @{$self->{parent_keys}}, $key;
-                $self->{depth}++;
-                for my $member (@{$section{data}->{$key}}){
-                    $self->_validate(
-                        $member,
-                        $section{schema}->{$schema_key}->{members},
-                        data => $member,
-                        schema => $section{schema}->{$schema_key}->{members}
-                    );
-                }
-                pop @{$self->{parent_keys}};
-                $self->{depth}--;
+            pop @{$self->{parent_keys}};
+            $self->{depth}--;
+        }
+        # Make sure that key in data is a leaf in schema.
+        # We cannot descend into a non-existing branch in data
+        # but it might be required by the schema.
+        else {
+            $self->explain(">>checking data key '$key' which is a leaf..");
+            if ($section{schema}->{$schema_key}->{members}){
+                $self->explain("but schema requires members.\n");
+                $self->error("'$key' should have members");
             }
-            # Make sure that key in data is a leaf in schema.
-            # We cannot descend into a non-existing branch in data
-            # but it might be required by the schema.
             else {
-                $self->explain(">>checking data key '$key' which is a leaf..");
-                if ($section{schema}->{$schema_key}->{members}){
-                    $self->explain("but schema requires members.\n");
-                    $self->error("'$key' should have members");
-                }
-                else {
-                    $self->explain("schema key is also a leaf. ok.\n");
-                }
+                $self->explain("schema key is also a leaf. ok.\n");
             }
         }
     }
-     # look for missing non-optional keys in schema
+    # look for missing non-optional keys in schema
     # this is only done on this level.
     # Otherwise "mandatory" inherited "upwards".
     $self->_check_mandatory_keys( %section );
