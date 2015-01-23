@@ -2,19 +2,13 @@ use 5.10.1;
 use strict;
 use warnings;
 package Data::Processor::Transformer;
-use Data::Processor::Error::Collection;
-
-use Carp;
 
 # XXX document this with pod. (if standalone)
 
 sub new {
     my $class  = shift;
-    my %p      = @_;
 
-    my $self = {
-
-    };
+    my $self = {};
     bless ($self, $class);
     return $self;
 }

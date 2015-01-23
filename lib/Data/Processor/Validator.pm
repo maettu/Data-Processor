@@ -17,6 +17,7 @@ sub new {
     my %p      = @_;
     my $self = {
         schema => $schema  // croak ('cannot validate without "schema"'),
+        data   => $p{data} // undef,
         verbose=> $p{verbose} // undef,
         errors => $p{errors}  // Data::Processor::Error::Collection->new(),
         depth       => $p{depth} // 0,
