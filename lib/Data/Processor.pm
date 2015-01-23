@@ -66,15 +66,14 @@ sub validate{
     my %p    = @_;
 
     $self->{validator}=Data::Processor::Validator->new(
-        schema      => $self->{schema} // $p{schema},
-        data        => $data,
+        $self->{schema} // $p{schema},
         verbose     => $p{verbose} // $self->{verbose} // undef,
         errors      => $self->{errors},
         depth       => $self->{depth},
         indent      => $self->{indent},
         parent_keys => $self->{parent_keys},
     );
-    return $self->{validator}->validate();
+    return $self->{validator}->validate($data);
 }
 
 =head2 transform_data

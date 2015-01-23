@@ -12,11 +12,11 @@ use Carp;
 # Data::Processor::Validator - Validate Data Against a Schema
 
 sub new {
-    my $class = shift;
-    my %p     = @_;
+    my $class  = shift;
+    my $schema = shift;
+    my %p      = @_;
     my $self = {
-        schema => $p{schema}  // croak ('cannot validate without "schema"'),
-        data   => $p{data}    // croak ('cannot validate without "data"'),
+        schema => $schema  // croak ('cannot validate without "schema"'),
         verbose=> $p{verbose} // undef,
         errors => $p{errors}  // Data::Processor::Error::Collection->new(),
         depth       => $p{depth} // 0,
@@ -34,6 +34,8 @@ sub new {
 
 sub validate {
     my $self = shift;
+    $self->{data} = shift;
+    croak ('cannot validate without "data"') unless $self->{data};
     $self->{errors} = Data::Processor::Error::Collection->new();
 
     $self->_add_defaults();
@@ -76,13 +78,12 @@ sub validate {
             $self->explain
                 (">>'$key' is not a leaf and we descend into it\n");
             my $e = Data::Processor::Validator->new(
-                schema      => $self->{schema}->{$schema_key}->{members},
-                data        => $self->{data}->{$key},
+                $self->{schema}->{$schema_key}->{members},
                 parent_keys => [@{$self->{parent_keys}}, $key],
                 depth       => $self->{depth}+1,
                 verbose     => $self->{verbose},
 
-            ) ->validate();
+            ) ->validate($self->{data}->{$key});
             $self->{errors}->add_collection($e);
 
         }
@@ -95,13 +96,12 @@ sub validate {
             $self->{depth}++;
             for my $member (@{$self->{data}->{$key}}){
                 my $e = Data::Processor::Validator->new(
-                    schema      => $self->{schema}->{$schema_key}->{members},
-                    data        => $member,
+                    $self->{schema}->{$schema_key}->{members},
                     parent_keys => [@{$self->{parent_keys}}, $key],
                     depth       => $self->{depth}+1,
                     verbose     => $self->{verbose},
 
-                ) ->validate();
+                ) ->validate($member);
                 $self->{errors}->add_collection($e);
 
             }
@@ -206,7 +206,7 @@ sub _check_mandatory_keys{
     }
 }
 
-# called by validate to check if a given key is defined in schema
+# find key to validate (section of) data against
 sub _schema_twin_key{
     my $self    = shift;
     my $key     = shift;
