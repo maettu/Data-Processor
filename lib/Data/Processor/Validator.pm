@@ -32,18 +32,9 @@ sub new {
 sub validate {
     my $self = shift;
     $self->{errors} = Data::Processor::Error::Collection->new();
-    $self->_validate({data => $self->{data}, schema => $self->{schema}});
 
-    return $self->{errors};
-}
-
-#################
-# internal methods
-#################
-sub _validate {
-    my $self = shift;
     # current sections of data and schema
-    my $section = shift;
+    my $section = {data => $self->{data}, schema => $self->{schema}};
     die unless ($section->{data} and $section->{schema});
 
     $self->_add_defaults($section);
@@ -88,15 +79,6 @@ sub _validate {
         if (ref $section->{data}->{$key} eq ref {} ){
             $self->explain
                 (">>'$key' is not a leaf and we descend into it\n");
-#~             push @{$self->{parent_keys}}, $key;
-#~             $self->{depth}++;
-#~             $self->_validate(
-#~                 {data => $section->{data}->{$key},
-#~                 schema => $section->{schema}->{$schema_key}->{members}}
-#~             );
-#~             pop @{$self->{parent_keys}};
-#~             $self->{depth}--;
-#~
             my $e = Data::Processor::Validator->new(
                 schema      => $section->{schema}->{$schema_key}->{members},
                 data        => $section->{data}->{$key},
@@ -105,7 +87,6 @@ sub _validate {
                 verbose     => $self->{verbose},
 
             ) ->validate();
-
             $self->{errors}->add_collection($e);
 
         }
@@ -117,10 +98,16 @@ sub _validate {
             push @{$self->{parent_keys}}, $key;
             $self->{depth}++;
             for my $member (@{$section->{data}->{$key}}){
-                $self->_validate(
-                    {data => $member,
-                    schema => $section->{schema}->{$schema_key}->{members}}
-                );
+                my $e = Data::Processor::Validator->new(
+                    schema      => $section->{schema}->{$schema_key}->{members},
+                    data        => $member,
+                    parent_keys => [@{$self->{parent_keys}}, $key],
+                    depth       => $self->{depth}+1,
+                    verbose     => $self->{verbose},
+
+                ) ->validate();
+                $self->{errors}->add_collection($e);
+
             }
             pop @{$self->{parent_keys}};
             $self->{depth}--;
@@ -143,7 +130,12 @@ sub _validate {
     # this is only done on this level.
     # Otherwise "mandatory" inherited "upwards".
     $self->_check_mandatory_keys( $section );
+    return $self->{errors};
 }
+
+#################
+# internal methods
+#################
 
 # add an error
 sub error {
