@@ -109,10 +109,8 @@ sub _validate {
             )
                 ->validate();
 
-            my @e = $e->as_array();
-            for (@e){
-                $self->{errors}->add_error($_);
-            }
+            $self->{errors}->add_collection($e);
+
 #~                 $section->{data}->{$key},
 #~                     parent_keys => \@pk,
 #~                     depth => $self->{depth}+1,

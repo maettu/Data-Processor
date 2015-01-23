@@ -45,6 +45,19 @@ sub add_error {
     push @{$self->{errors}}, $e;
 }
 
+=head add_collection
+Adds another error collection
+=cut
+sub add_collection{
+    my $self  = shift;
+    my $other = shift;
+    my @e = $other->as_array();
+    for (@e){
+        $self->add_error($_);
+    }
+
+}
+
 =head2 any_error_contains
 Return true if any of the collected errors contains a given string.
   $error->collection->any_error_contains(
