@@ -97,25 +97,17 @@ sub _validate {
 #~             pop @{$self->{parent_keys}};
 #~             $self->{depth}--;
 #~
-            my @pk = @{$self->{parent_keys}};
-            push @pk, $key;
             my $e = Data::Processor::Validator->new(
                 schema      => $section->{schema}->{$schema_key}->{members},
                 data        => $section->{data}->{$key},
-                parent_keys => \@pk,
+                parent_keys => [@{$self->{parent_keys}}, $key],
                 depth       => $self->{depth}+1,
                 verbose     => $self->{verbose},
 
-            )
-                ->validate();
+            ) ->validate();
 
             $self->{errors}->add_collection($e);
 
-#~                 $section->{data}->{$key},
-#~                     parent_keys => \@pk,
-#~                     depth => $self->{depth}+1,
-#~                     verbose => $self->{verbose}
-#~                 );
         }
         elsif ((ref $section->{data}->{$key} eq ref [])
             && $section->{schema}->{$schema_key}->{array}){
