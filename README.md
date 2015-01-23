@@ -34,10 +34,15 @@ already or be passed as an argument.
 
 UNIMPLEMENTED
 
-Transform the data according to rules specified as callbacks that the
-module calls for you.
+Transform one key in the data according to rules specified
+as callbacks that themodule calls for you.
+Transforms the data in-place.
 
-    my ($data_transformed, @errors) = $processor->transform_data(data=>$data);
+    my $validator = Data::Processor::Validator->new($schema, data => $data)
+    my $error_string = $processor->transform($key, $validator);
+
+This is not tremendously useful at the moment, especially because validate()
+transforms during validation.
 
 ## transform\_schema
 
