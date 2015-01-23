@@ -1,6 +1,8 @@
 Revision history for Data-Processor
 
 {{$NEXT}}
+
+0.1.6  2015-01-23 16:50:55 CET
     - no more "require"
     - code cleanup
 
