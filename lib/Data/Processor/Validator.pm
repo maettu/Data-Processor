@@ -88,21 +88,32 @@ sub _validate {
         if (ref $section->{data}->{$key} eq ref {} ){
             $self->explain
                 (">>'$key' is not a leaf and we descend into it\n");
-            push @{$self->{parent_keys}}, $key;
-            $self->{depth}++;
-            $self->_validate(
-                {data => $section->{data}->{$key},
-                schema => $section->{schema}->{$schema_key}->{members}}
-            );
-            pop @{$self->{parent_keys}};
-            $self->{depth}--;
+#~             push @{$self->{parent_keys}}, $key;
+#~             $self->{depth}++;
+#~             $self->_validate(
+#~                 {data => $section->{data}->{$key},
+#~                 schema => $section->{schema}->{$schema_key}->{members}}
+#~             );
+#~             pop @{$self->{parent_keys}};
+#~             $self->{depth}--;
+#~
+            my @pk = @{$self->{parent_keys}};
+            push @pk, $key;
+            my $e = Data::Processor::Validator->new(
+                schema      => $section->{schema}->{$schema_key}->{members},
+                data        => $section->{data}->{$key},
+                parent_keys => \@pk,
+                depth       => $self->{depth}+1,
+                verbose     => $self->{verbose},
 
-#~             my @pk = @{$self->{parent_keys}};
-#~             push @pk, $key;
-#~             my $e = Data::Processor::Validator->new(
-#~                 $section{schema}->{$schema_key}->{members}
-#~             )
-#~                 ->_validate($section{data}->{$key},
+            )
+                ->validate();
+
+            my @e = $e->as_array();
+            for (@e){
+                $self->{errors}->add_error($_);
+            }
+#~                 $section->{data}->{$key},
 #~                     parent_keys => \@pk,
 #~                     depth => $self->{depth}+1,
 #~                     verbose => $self->{verbose}

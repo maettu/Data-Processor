@@ -25,12 +25,24 @@ sub new {
 
 =head2 add
 Adds an error.
+parameters:
+- message
+- path
 =cut
 sub add {
     my $self = shift;
     my %p    = @_;
     my $error = Data::Processor::Error::Instance->new(%p);
     push @{$self->{errors}}, $error;
+}
+
+=head add_error
+Adds an error object
+=cut
+sub add_error {
+    my $self = shift;
+    my $e    = shift;
+    push @{$self->{errors}}, $e;
 }
 
 =head2 any_error_contains
