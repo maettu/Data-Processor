@@ -60,7 +60,6 @@ $data = {
 };
 $error_collection = $processor->validate($data);
 ok ($error_collection->count==0, 'no more errors with corrected config');
-use Data::Dumper; print Dumper $error_collection->as_array;
 
 # check error messages from schema.
 $data = {

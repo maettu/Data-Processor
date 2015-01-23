@@ -54,17 +54,17 @@ sub validate {
         # skip if explicitly asked for
         if ($self->{schema}->{$schema_key}->{no_descend_into}){
             $self->explain (
-                "skipping '$key' because schema explicitly says so.\n");
+                ">>skipping '$key' because schema explicitly says so.\n");
             next;
         }
         # skip data branch if schema key is empty.
         if (! %{$self->{schema}->{$schema_key}}){
-            $self->explain ("skipping '$key' because schema key is empty'");
+            $self->explain (">>skipping '$key' because schema key is empty\n'");
             next;
         }
         if (! $self->{schema}->{$schema_key}->{members}){
             $self->explain (
-                "not descending into '$key'. No members specified\n"
+                ">>not descending into '$key'. No members specified\n"
             );
             next;
         }
