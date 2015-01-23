@@ -36,7 +36,7 @@ sub add {
     push @{$self->{errors}}, $error;
 }
 
-=head add_error
+=head2 add_error
 Adds an error object
 =cut
 sub add_error {
@@ -45,7 +45,7 @@ sub add_error {
     push @{$self->{errors}}, $e;
 }
 
-=head add_collection
+=head2 add_collection
 Adds another error collection
 =cut
 sub add_collection{
