@@ -193,11 +193,8 @@ sub _check_mandatory_keys{
                 $self->explain("$c matching occurencies found\n");
                 next if $c > 0;
             }
-            next if $self->{schema}->{$key}->{array};
-
 
             # should only get here in case of error.
-
             my $error_msg = '';
             $error_msg = $self->{schema}->{$key}->{error_msg}
                 if $self->{schema}->{$key}->{error_msg};

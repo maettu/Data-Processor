@@ -33,6 +33,10 @@ my $schema = {
         array => 1,
         value => qr/\d+/,
     },
+    missing_array => {
+        array => 1,
+        value => qr/I am not there/,
+    }
 };
 
 my $data = {
@@ -60,13 +64,20 @@ my $p = Data::Processor->new($schema);
 my $error_collection = $p->validate($data, verbose=>0);
 
 # wrong array element will give 3 errors: 1 wrong key and 2 missing mandatory keys
-ok ($error_collection->count == 8, '8 errors detected');
+ok ($error_collection->count == 9, '9 errors detected');
 
 ok ($error_collection->any_error_contains(
         string => 'should have members',
         field  => 'message'
     ),
     'config leaf that should be branch detected'
+);
+
+ok ($error_collection->any_error_contains(
+        string => "mandatory key 'missing_array' missing.",
+        field  => 'message'
+    ),
+    'mandatory array missing from data'
 );
 
 done_testing;
