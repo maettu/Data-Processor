@@ -32,9 +32,7 @@ sub new {
 sub validate {
     my $self = shift;
     $self->{errors} = Data::Processor::Error::Collection->new();
-    $self->_validate($self->{data}, $self->{schema},
-    # XXX
-    data => $self->{data}, schema => $self->{schema});
+    $self->_validate({data => $self->{data}, schema => $self->{schema}});
 
     return $self->{errors};
 }
@@ -45,7 +43,9 @@ sub validate {
 sub _validate {
     my $self = shift;
     # current sections of data and schema
-    my %section = @_;
+    my $section = shift;
+#~     use Data::Dumper;say Dumper $section;
+    my %section = %{$section};
     die unless ($section{data} and $section{schema});
 
     $self->_add_defaults(%section);
@@ -93,13 +93,22 @@ sub _validate {
             push @{$self->{parent_keys}}, $key;
             $self->{depth}++;
             $self->_validate(
-                $section{data}->{$key},
-                $section{schema}->{$schema_key}->{members},
-                data => $section{data}->{$key},
-                schema => $section{schema}->{$schema_key}->{members}
+                {data => $section{data}->{$key},
+                schema => $section{schema}->{$schema_key}->{members}}
             );
             pop @{$self->{parent_keys}};
             $self->{depth}--;
+
+#~             my @pk = @{$self->{parent_keys}};
+#~             push @pk, $key;
+#~             my $e = Data::Processor::Validator->new(
+#~                 $section{schema}->{$schema_key}->{members}
+#~             )
+#~                 ->_validate($section{data}->{$key},
+#~                     parent_keys => \@pk,
+#~                     depth => $self->{depth}+1,
+#~                     verbose => $self->{verbose}
+#~                 );
         }
         elsif ((ref $section{data}->{$key} eq ref [])
             && $section{schema}->{$schema_key}->{array}){
@@ -110,10 +119,8 @@ sub _validate {
             $self->{depth}++;
             for my $member (@{$section{data}->{$key}}){
                 $self->_validate(
-                    $member,
-                    $section{schema}->{$schema_key}->{members},
-                    data => $member,
-                    schema => $section{schema}->{$schema_key}->{members}
+                    {data => $member,
+                    schema => $section{schema}->{$schema_key}->{members}}
                 );
             }
             pop @{$self->{parent_keys}};
