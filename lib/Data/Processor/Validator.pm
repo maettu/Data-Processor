@@ -29,6 +29,9 @@ sub new {
     return $self;
 }
 
+# (recursively) checks data, or a section thereof;
+# by instantiatin D::P::V objects and calling validate on them
+
 sub validate {
     my $self = shift;
     $self->{errors} = Data::Processor::Error::Collection->new();
@@ -39,12 +42,9 @@ sub validate {
         $self->explain (">>'$key'");
 
         # checks
-        my $schema_key =
-            $self->_schema_twin_key($key) or next;
+        my $schema_key = $self->_schema_twin_key($key) or next;
         # from here we know to have a "twin" key $schema_key in the schema
-
         $self->__value_is_valid( $key );
-
         $self->__validator_returns_undef($key, $schema_key);
 
         # transformer
