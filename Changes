@@ -1,6 +1,7 @@
 Revision history for Data-Processor
 
 {{$NEXT}}
+    - fix test for Perl 5.10.1
 
 0.3.0  2015-01-24 23:01:34 CET
     - data template generator
