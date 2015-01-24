@@ -21,4 +21,6 @@ my $schema = {
 my $p = Data::Processor->new($schema);
 my $pod = $p->pod_write();
 
+ok (2);
+
 done_testing;
