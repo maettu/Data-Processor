@@ -232,7 +232,10 @@ Write descriptive pod from the schema.
 =cut
 sub pod_write{
     my $self = shift;
-    return Data::Processor::PodWriter::pod_write($self->{schema});
+    return Data::Processor::PodWriter::pod_write(
+        $self->{schema},
+        "=head1 Schema Description\n\n"
+    );
 }
 
 =head1 AUTHOR

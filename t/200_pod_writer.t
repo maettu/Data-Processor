@@ -5,14 +5,18 @@ use Data::Processor;
 
 my $schema = {
     level_1 => {
-
+        description => 'An element on level 1',
         members => {
-            level_2 => {
+            level_2_1 => {
+                description => 'element 1 on level 2',
                 members => {
                     level_3 => {
-
+                        description => 'element on level 3',
                     }
                 }
+            },
+            level_2_2 => {
+                description => 'element 2 on level 1'
             }
         }
     }
@@ -20,7 +24,8 @@ my $schema = {
 
 my $p = Data::Processor->new($schema);
 my $pod = $p->pod_write();
+print $pod;
 
-ok (2);
+ok (1);
 
 done_testing;
