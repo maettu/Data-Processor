@@ -55,7 +55,7 @@ ok ($data_template->{GENERAL}->{logfile} = 'absolute path to logfile (?-xism:/.*
 
 my $data_template = $p->make_data($schema->{GENERAL}->{members}->{silos});
 ok (exists $data_template->{'silo-.+'}, 'entry point "silos" found');
-ok ($data_template->{'silo-.+'}->{url} eq 'url of the silo server. Only https:// allowed(?^:https.*)',
+ok ($data_template->{'silo-.+'}->{url} =~ m{^url of the silo server. Only https:// allowed},
     'url has correct content');
 
 
