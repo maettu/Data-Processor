@@ -30,9 +30,11 @@ already or be passed as an argument.
 
     my @errors = $processor->validate($data, verbose=>0);
 
-## transform\_data
+## validate\_schema
 
-UNIMPLEMENTED
+check that the schema is valid
+
+## transform\_data
 
 Transform one key in the data according to rules specified
 as callbacks that themodule calls for you.
@@ -44,12 +46,6 @@ Transforms the data in-place.
 This is not tremendously useful at the moment, especially because validate()
 transforms during validation.
 
-## transform\_schema
-
-UNIMPLEMENTED
-
-    my ($schema_transformed, @errors) = $processor->transform_schema(schema=>$schema);
-
 ## make\_data
 
 UNIMPLEMENTED
@@ -58,9 +54,9 @@ UNIMPLEMENTED
 
 ## make\_pod
 
-UNIMPLEMENTED
+Write descriptive pod from the schema.
 
-    my ($pod, @errors) = $processor->make_pod(data=>$data);
+    my $pod_string = $processor->make_pod();
 
 # AUTHOR
 
