@@ -1,6 +1,8 @@
 Revision history for Data-Processor
 
 {{$NEXT}}
+
+0.3.1  2015-01-24 23:27:50 CET
     - fix test for Perl 5.10.1
 
 0.3.0  2015-01-24 23:01:34 CET
