@@ -1,6 +1,7 @@
 Revision history for Data-Processor
 
 {{$NEXT}}
+    - data template generator
 
 0.2.0  2015-01-24 22:12:26 CET
     - Pod writer

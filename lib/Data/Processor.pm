@@ -2,7 +2,7 @@ package Data::Processor;
 
 use strict;
 use 5.010_001;
-our $VERSION = '0.2.0';
+our $VERSION = '0.3.0';
 
 use Carp;
 use Data::Processor::Error::Collection;
@@ -243,14 +243,15 @@ sub transform_data{
 
 =head2 make_data
 
-UNIMPLEMENTED
+Writes a data template using the information found in the schema.
 
- my ($data, @errors) = $processor->make_data(data=>$data);
+ my $data = $processor->make_data(data=>$data);
 
 =cut
 sub make_data{
-    die 'unimplemented';
-    # XXX
+    my $self = shift;
+    my $entry_point = shift // $self->{schema};
+    return Data::Processor::Generator::make_data_template($entry_point);
 }
 
 =head2 make_pod
