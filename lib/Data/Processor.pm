@@ -10,6 +10,7 @@ use Data::Processor::Validator;
 use Data::Processor::Transformer;
 use Data::Processor::Generator;
 use Data::Processor::PodWriter;
+use Data::Processor::ValidatorFactory;
 
 =head1 NAME
 
@@ -43,7 +44,7 @@ sub new{
     my $schema = shift;
     my %p     = @_;
     my $self = {
-        schema      => $schema,
+        schema      => $schema // {},
         errors      => Data::Processor::Error::Collection->new(),
         depth       => $p{depth}  // 0,
         indent      => $p{indent} // 4,
@@ -51,6 +52,10 @@ sub new{
         verbose     => $p{verbose} // undef,
     };
     bless ($self, $class);
+    my $e = $self->validateSchema;
+    if ($e->count > 0){
+        carp "There is a problem with your schema:".join "\n", $e->as_array;
+    }
     return $self;
 }
 
@@ -74,6 +79,101 @@ sub validate{
         parent_keys => $self->{parent_keys},
     );
     return $self->{validator}->validate($data);
+}
+
+=head2 validateSchema
+
+check that the schema is valid
+
+=cut
+
+sub validateSchema {
+    my $self = shift;
+    my $vf = Data::Processor::ValidatorFactory->new;
+    my $bool = $vf->rx(qr(^[01]$),'Expected 0 or 1');
+    my $schemaSchema;
+    $schemaSchema = {
+        '.+' => {
+            regex => 1,
+            optional => 1,
+            description => 'content description for the key',
+            members => {
+                description => {
+                    description => 'the description of this content of this key',
+                    optional => 1,
+                    validator => $vf->rx(qr(.+),'expected a description string'),
+                },
+                example => {
+                    description => 'an example value for this key',
+                    optional => 1,
+                    validator => $vf->rx(qr(.+),'expected an example string'),
+                },
+                regex => {
+                    description => 'should this key be treated as a regular expression?',
+                    optional => 1,
+                    default => 0,
+                    validator => $bool
+                },
+                value => {
+                    description => 'a regular expression describing the expected value',
+                    optional => 1,
+                    validator => sub {
+                        ref shift eq 'Regexp' ? undef : 'expected a regular expression value (qr/.../)'
+                    }
+                },
+                error_msg => {
+                    description => 'an error message for the case that the value regexp does not match',
+                    optional => 1,
+                    validator => $vf->rx(qr(.+),'expected an error message string'),
+                },
+                optional => {
+                    description => 'is this key optional ?',
+                    optional => 1,
+                    default => 0,
+                    validator => $bool,
+                },
+                default => {
+                    description => 'the default value for this key',
+                    optional => 1
+                },
+                array => {
+                    description => 'is the value of this key expected to be an array? In array mode, value and validator will be applied to each element of the array.',
+                    optional => 1,
+                    default => 0,
+                    validator => $bool
+                },
+                members => {
+                    description => 'what keys do I expect in a hash hanging off this key',
+                    optional => 1,
+                    validator => sub {
+                        my $value = shift;
+                        if (ref $value ne 'HASH'){
+                            return "expected a hash"
+                        }
+                        my $subVal=Data::Processor::Validator->new($schemaSchema,%$self);
+                        my $e = $subVal->validate($value);
+                        return ( $e->count > 0 ? join("\n", $e->as_array) : undef);
+                    }
+                },
+                validator => {
+                    description => 'a callback which gets called with (value,section) to validate the value. If it returns anything, this is treated as an error message',
+                    optional => 1,
+                    validator => sub {
+                        ref shift eq 'CODE' ? undef : 'expected a callback'
+                    },
+                    example => 'sub { my ($value,$section) = @_; return $value <= 1 ? "value must be > 1" : undef}'
+                },
+                transformer => {
+                    description => 'a callback which gets called on the valuewith (value,section) to validate the value. If it returns anything, this is treated as an error message',
+                    optional => 1,
+                    validator => sub {
+                        ref shift eq 'CODE' ? undef : 'expected a regular expression value (qr/.../)'
+                    }
+                }
+            }
+        }
+    };
+    return Data::Processor::Validator->new($schemaSchema,%$self)->validate($self->{schema});
 }
 
 =head2 transform_data
