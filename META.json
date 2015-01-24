@@ -1,5 +1,5 @@
 {
-   "abstract" : "Transform Perl Data Structures, Validate Data against a Schema, Produce Data from a Schema, or produce documentation directly from information in the Data",
+   "abstract" : "Transform Perl Data Structures, Validate Data against a Schema, Produce Data from a Schema, or produce documentation directly from information in the Schema.",
    "author" : [
       "Matthias Bloch <matthias.bloch@puffin.ch>"
    ],
@@ -58,7 +58,7 @@
          "web" : "https://github.com/maettu/Data-Processor"
       }
    },
-   "version" : "0.2.0",
+   "version" : "0.3.0",
    "x_contributors" : [
       "Dominik Hassler <hadfl@cpan.org>",
       "Tobias Oetiker <tobi@oetiker.ch>",

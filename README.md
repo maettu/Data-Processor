@@ -1,13 +1,50 @@
 # NAME
 
-THIS MODULE ONLY WORKS FOR A NARROW USE CASE RIGHT NOW. ALSO, INTERFACE CHANGES ARE LIKELY.
-
-Data::Processor - Transform Perl Data Structures, Validate Data against a Schema, Produce Data from a Schema, or produce documentation directly from information in the Data
+Data::Processor - Transform Perl Data Structures, Validate Data against a Schema, Produce Data from a Schema, or produce documentation directly from information in the Schema.
 
 # SYNOPSIS
 
     use Data::Processor;
-    # XXX
+    my $schema = {
+      section => {
+          description => 'a section with a few members',
+          error_msg   => 'cannot find "section" in config',
+          members => {
+              foo => {
+                  # value restriction either with a regex..
+                  value => qr{f.*},
+                  description => 'a string beginning with "f"'
+              },
+              bar => {
+                  # ..or with a validator callback.
+                  validator => sub {
+                      my $self   = shift;
+                      my $parent = shift;
+                      # undef is "no-error" -> success.
+                      no strict 'refs';
+                      return undef
+                          if $self->{value} == 42;
+                  }
+              },
+              wuu => {
+                  optional => 1
+              }
+          }
+      }
+    };
+
+    my $p = Data::Processor->new($schema);
+
+    my $data = {
+      section => {
+          foo => 'frobnicate',
+          bar => 42,
+          # "wuu" being optional, can be omitted..
+      }
+    };
+
+    my $error_collection = $p->validate($data, verbose=>0);
+    # no errors :-)
 
 # DESCRIPTION
 
@@ -28,11 +65,14 @@ optional parameters:
 Validate the data against a schema. The schema either needs to be present
 already or be passed as an argument.
 
-    my @errors = $processor->validate($data, verbose=>0);
+    my $error_collection = $processor->validate($data, verbose=>0);
 
 ## validate\_schema
 
-check that the schema is valid
+check that the schema is valid.
+This method gets called upon creation of a new Data::Processor object.
+
+    my $error_collection = $processor->validate_schema();
 
 ## transform\_data
 
@@ -48,9 +88,9 @@ transforms during validation.
 
 ## make\_data
 
-UNIMPLEMENTED
+Writes a data template using the information found in the schema.
 
-    my ($data, @errors) = $processor->make_data(data=>$data);
+    my $data = $processor->make_data(data=>$data);
 
 ## make\_pod
 
