@@ -12,7 +12,7 @@ can_ok( $processor, 'validate' );
 can_ok( $processor, 'transform_data' );
 can_ok( $processor, 'transform_schema' );
 can_ok( $processor, 'make_data' );
-can_ok( $processor, 'make_pod' );
+can_ok( $processor, 'pod_write' );
 
 
 
