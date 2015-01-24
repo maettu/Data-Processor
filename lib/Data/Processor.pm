@@ -52,7 +52,7 @@ sub new{
         verbose     => $p{verbose} // undef,
     };
     bless ($self, $class);
-    my $e = $self->validateSchema;
+    my $e = $self->validate_schema;
     if ($e->count > 0){
         croak "There is a problem with your schema:".join "\n", $e->as_array;
     }
@@ -81,13 +81,13 @@ sub validate{
     return $self->{validator}->validate($data);
 }
 
-=head2 validateSchema
+=head2 validate_schema
 
 check that the schema is valid
 
 =cut
 
-sub validateSchema {
+sub validate_schema {
     my $self = shift;
     my $vf = Data::Processor::ValidatorFactory->new;
     my $bool = $vf->rx(qr(^[01]$),'Expected 0 or 1');
@@ -164,7 +164,7 @@ sub validateSchema {
                     example => 'sub { my ($value,$section) = @_; return $value <= 1 ? "value must be > 1" : undef}'
                 },
                 transformer => {
-                    description => 'a callback which gets called on the valuewith (value,section) to validate the value. If it returns anything, this is treated as an error message',
+                    description => 'a callback which gets called on the value with (value,section) to validate the value. If it returns anything, this is treated as an error message',
                     optional => 1,
                     validator => sub {
                         ref shift eq 'CODE' ? undef : 'expected a callback'
