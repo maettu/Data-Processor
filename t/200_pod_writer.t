@@ -9,9 +9,11 @@ my $schema = {
         members => {
             level_2_1 => {
                 description => 'element 1 on level 2',
+                optional => 1,
                 members => {
                     level_3 => {
                         description => 'element on level 3',
+                        default     => '42'
                     }
                 }
             },

@@ -199,18 +199,6 @@ sub transform_data{
     return Data::Processor::Transformer->new()->transform($key, $val);
 }
 
-=head2 transform_schema
-
-UNIMPLEMENTED
-
- my ($schema_transformed, @errors) = $processor->transform_schema(schema=>$schema);
-
-=cut
-sub transform_schema{
-    die 'unimplemented';
-    # XXX
-}
-
 =head2 make_data
 
 UNIMPLEMENTED
