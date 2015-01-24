@@ -54,7 +54,7 @@ sub new{
     bless ($self, $class);
     my $e = $self->validateSchema;
     if ($e->count > 0){
-        carp "There is a problem with your schema:".join "\n", $e->as_array;
+        croak "There is a problem with your schema:".join "\n", $e->as_array;
     }
     return $self;
 }
@@ -167,7 +167,7 @@ sub validateSchema {
                     description => 'a callback which gets called on the valuewith (value,section) to validate the value. If it returns anything, this is treated as an error message',
                     optional => 1,
                     validator => sub {
-                        ref shift eq 'CODE' ? undef : 'expected a regular expression value (qr/.../)'
+                        ref shift eq 'CODE' ? undef : 'expected a callback'
                     }
                 }
             }
