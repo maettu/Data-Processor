@@ -29,5 +29,6 @@ my $pod = $p->pod_write();
 print $pod;
 
 ok (1);
+# XXX make real test here
 
 done_testing;
