@@ -3,6 +3,8 @@ use strict;
 use warnings;
 package Data::Processor::PodWriter;
 
+# writes pod for a schema given.
+
 sub pod_write{
     my $schema     = shift;
     my $pod_string = shift;
