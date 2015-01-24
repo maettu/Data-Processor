@@ -13,17 +13,13 @@ sub make_data_template{
 
         # data keys always are hashes in schema.
         if (ref $schema_section->{$key} eq ref {} ){
-            my $depth_add;
             if ($key eq 'members'){
                 # "members" indicates children but is not written in data
-                $depth_add = 0;
                 return make_data_template(
                     $schema_section->{$key},
                 );
             }
             else{
-                $depth_add = 1;
-
                 if (exists $schema_section->{$key}->{description}){
                     $data->{$key} = $schema_section->{$key}->{description}
                 }
