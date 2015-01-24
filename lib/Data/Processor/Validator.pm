@@ -256,11 +256,11 @@ sub __validator_returns_undef {
     $self->explain("running validator for '$key': $self->{data}->{$key}\n");
 
     if (ref $self->{data}->{$key} eq ref []
-        && $self->{schema}->{$key}->{array}){
+        && $self->{schema}->{$schema_key}->{array}){
 
         my $counter = 0;
         for my $elem (@{$self->{data}->{$key}}){
-            my $return_value = $self->{schema}->{$key}->{validator}->($elem, $self->{data});
+            my $return_value = $self->{schema}->{$schema_key}->{validator}->($elem, $self->{data});
             if ($return_value){
                 $self->explain("validator error: $return_value (element $counter)\n");
                 $self->error("Execution of validator for '$key' element $counter returns with error: $return_value");
@@ -272,7 +272,7 @@ sub __validator_returns_undef {
         }
     }
     else {
-        my $return_value = $self->{schema}->{$key}->{validator}->($self->{data}->{$key}, $self->{data});
+        my $return_value = $self->{schema}->{$schema_key}->{validator}->($self->{data}->{$key}, $self->{data});
         if ($return_value){
             $self->explain("validator error: $return_value\n");
             $self->error("Execution of validator for '$key' returns with error: $return_value");
