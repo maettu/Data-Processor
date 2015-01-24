@@ -178,8 +178,6 @@ sub validateSchema {
 
 =head2 transform_data
 
-UNIMPLEMENTED
-
 Transform one key in the data according to rules specified
 as callbacks that themodule calls for you.
 Transforms the data in-place.
@@ -227,14 +225,14 @@ sub make_data{
 
 =head2 make_pod
 
-UNIMPLEMENTED
+Write descriptive pod from the schema.
 
- my ($pod, @errors) = $processor->make_pod(data=>$data);
+ my $pod_string = $processor->make_pod();
 
 =cut
-sub make_pod{
-    die 'unimplemented';
-    # XXX
+sub pod_write{
+    my $self = shift;
+    return Data::Processor::PodWriter::pod_write($self->{schema});
 }
 
 =head1 AUTHOR
