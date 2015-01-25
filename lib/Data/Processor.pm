@@ -216,6 +216,63 @@ sub validate_schema {
     return Data::Processor::Validator->new($schemaSchema,%$self)->validate($self->{schema});
 }
 
+=head2 merge_schema
+
+merges another schema into the schema
+
+ my $error_collection = $processor->merge_schema();
+
+=cut
+
+sub merge_schema {
+    my $self      = shift;
+    my $schema    = shift;
+
+    my $mergeNode = $self->{schema};
+    for my $key (@{$_[0]}){
+        if (exists $mergeNode->{$key}){
+            $mergeNode = $mergeNode->{$key};
+        }
+        else{
+            croak "merge node does not exists";
+        }
+    }
+
+    my $mergeSubSchema = sub {
+        my $subSchema      = shift;
+        my $otherSubSchema = shift;
+
+        for my $elem (keys %$otherSubSchema){
+            #copy whole sub schema if element does not yet exist on schema
+            exists $subSchema->{$elem} || do {
+                $subSchema->{$elem} = $otherSubSchema->{$elem};
+                next;
+            };
+
+            #merge members subtree recursively
+            exists $otherSubSchema->{$elem}->{members} && do {
+                exists $subSchema->{$elem}->{members} || $subSchema->{$elem}->{members} = {};
+                $mergeSubSchema->($subSchema->{$elem}->{members}, $otherSubSchema->{$elem}->{members});
+            };
+
+            #description matches? if not, warn
+            if (!defined $subSchema->{$elem}->{description}){
+                $subSchema->{$elem}->{description} = $otherSubSchema->{$elem}->{description};
+            }
+            elsif (defined $otherSubSchema->{$elem}->{description}
+                && $subSchema->{$elem}->{description} ne $otherSubSchema->{$elem}->{description}){
+                warn "merging element '$elem': descriptions do not match\n";
+            }
+
+
+
+    };
+
+    $mergeSubSchema->($mergeNode, $schema);
+
+    return Data::Processor::Validator->new($schemaSchema, %$self)->validate($self->{schema});
+}
+
 =head2 transform_data
 
 Transform one key in the data according to rules specified
