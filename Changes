@@ -1,6 +1,7 @@
 Revision history for Data-Processor
 
 {{$NEXT}}
+    - bugfixes
 
 0.3.2  2015-01-24 23:44:06 CET
     - bugfix (minor), removal of spurious file
