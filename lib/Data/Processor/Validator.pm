@@ -178,7 +178,7 @@ sub _check_mandatory_keys{
                    and $self->{schema}->{$key}->{optional}){
 
             $self->explain("true\n");
-            next if $self->{data}->{$key};
+            next if defined $self->{data}->{$key};
 
             # regex-keys never directly occur.
             if ($self->{schema}->{$key}->{regex}){
