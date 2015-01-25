@@ -13,7 +13,7 @@ sub new {
     return $self;
 }
 
-sub transform{
+sub transform {
     my $self    = shift;
     my $key     = shift;
     my $section = shift;
@@ -30,15 +30,14 @@ sub transform{
 
         };
         if (my $err = $@) {
-            if (ref $err eq 'HASH' and $err->{msg}){
+            if (ref $err eq 'HASH' && defined $err->{msg}){
                 $err = $err->{msg};
             }
             return "error transforming '$key': $err";
         }
-        else {
-            $section->{data}->{$key} = $return_value;
-        }
+        $section->{data}->{$key} = $return_value;
     }
+    return undef;
 }
 
 1
