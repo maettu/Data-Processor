@@ -93,7 +93,6 @@ sub validate {
 
             $self->explain(
             ">>'$key' is an array reference so we check all elements\n");
-            push @{$self->{parent_keys}}, $key;
             for my $member (@{$self->{data}->{$key}}){
                 my $e = Data::Processor::Validator->new(
                     $self->{schema}->{$schema_key}->{members},
@@ -103,9 +102,7 @@ sub validate {
 
                 ) ->validate($member);
                 $self->{errors}->add_collection($e);
-
             }
-            pop @{$self->{parent_keys}};
         }
         # Make sure that key in data is a leaf in schema.
         # We cannot descend into a non-existing branch in data
