@@ -1,7 +1,9 @@
 use strict;
-use lib 'lib';
+use FindBin; use lib "$FindBin::Bin/../lib";
+#use lib 'lib';
 use Test::More;
 use Data::Processor;
+use Data::Dumper;
 
 my $schema = {
     merge => {
@@ -35,9 +37,13 @@ my $data = {
     }
 };
 
-my $p = Data::Processor->new( { %$schema, %$schema_2 } );
+my $p = Data::Processor->new($schema);
 
-my $error_collection = $p->validate($data, verbose=>0);
+$p->merge_schema($schema_2);
+
+print Dumper $p->{schema};
+
+my $error_collection = $p->validate($data, verbose=>1);
 
 # wrong array element will give 3 errors: 1 wrong key and 2 missing mandatory keys
 ok ($error_collection->count == 1, '1 error detected');

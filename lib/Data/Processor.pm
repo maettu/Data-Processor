@@ -229,6 +229,7 @@ sub merge_schema {
     my $schema    = shift;
 
     my $mergeNode = $self->{schema};
+    shift @{$_[0]} if $_->[0] eq 'root';
     for my $key (@{$_[0]}){
         if (exists $mergeNode->{$key}){
             $mergeNode = $mergeNode->{$key};
@@ -238,9 +239,27 @@ sub merge_schema {
         }
     }
 
-    my $mergeSubSchema = sub {
+    my $mergeSubSchema;
+    $mergeSubSchema = sub {
+        my $elem           = shift;
         my $subSchema      = shift;
         my $otherSubSchema = shift;
+
+        my $checkKey = sub {
+            my $elem  = shift;
+            my $key   = shift;
+            my $warn  = shift;
+
+            if (!defined $subSchema->{$elem}->{$key}){
+                $subSchema->{$elem}->{$key}  = $otherSubSchema->{$elem}->{$key};
+            }
+            elsif (defined $otherSubSchema->{$elem}->{$key}
+                && $subSchema->{$elem}->{$key} ne $otherSubSchema->{$elem}->{$key}){
+
+                croak "merging element '$elem' : $key does not match" if !$warn;
+                warn "merging element '$elem': $key does not match, not merging it\n";
+            }
+        };
 
         for my $elem (keys %$otherSubSchema){
             #copy whole sub schema if element does not yet exist on schema
@@ -251,26 +270,49 @@ sub merge_schema {
 
             #merge members subtree recursively
             exists $otherSubSchema->{$elem}->{members} && do {
-                exists $subSchema->{$elem}->{members} || $subSchema->{$elem}->{members} = {};
+                exists $subSchema->{$elem}->{members} || ($subSchema->{$elem}->{members} = {});
                 $mergeSubSchema->($subSchema->{$elem}->{members}, $otherSubSchema->{$elem}->{members});
             };
 
-            #description matches? if not, warn
-            if (!defined $subSchema->{$elem}->{description}){
-                $subSchema->{$elem}->{description} = $otherSubSchema->{$elem}->{description};
+            $checkKey->($elem, 'description', 1);
+            $checkKey->($elem, 'example', 1);
+            $checkKey->($elem, 'default', 1);
+            $checkKey->($elem, 'error_msg', 1);
+            $checkKey->($elem, 'regexp');
+            $checkKey->($elem, 'array');
+            $checkKey->($elem, 'value');
+
+            #special handler for transformer
+            defined $otherSubSchema->{$elem}->{transformer} && do {
+                croak "merging element '$elem': cannot overwrite tranformer"
+                    if (defined $subSchema->{$elem}->{transformer});
+                
+                $subSchema->{$elem}->{transformer} = $otherSubSchema->{$elem}->{transformer};
+            };
+
+            #special handler for optional: set it mandatory if at least one is not optional
+            delete $subSchema->{$elem}->{optional}
+                if !($subSchema->{$elem}->{optional} && $otherSubSchema->{$elem}->{optional});
+
+            #special handler for validator: combine validator subs
+            if ((my $validator = $subSchema->{$elem}->{validator})
+                && $otherSubSchema->{$elem}->{validator}){
+
+                $subSchema->{$elem}->{validator} = sub {
+                    return $validator->(@_) // $otherSubSchema->{$elem}->{validator}->(@_);
+                };
             }
-            elsif (defined $otherSubSchema->{$elem}->{description}
-                && $subSchema->{$elem}->{description} ne $otherSubSchema->{$elem}->{description}){
-                warn "merging element '$elem': descriptions do not match\n";
+            elsif ($otherSubSchema->{$elem}->{validator}){
+                $subSchema->{$elem}->{validator} = sub {
+                    $otherSubSchema->{$elem}->{validator}->(@_)
+                };
             }
-
-
-
+        }
     };
 
     $mergeSubSchema->($mergeNode, $schema);
 
-    return Data::Processor::Validator->new($schemaSchema, %$self)->validate($self->{schema});
+    return $self->validate_schema;
 }
 
 =head2 transform_data
