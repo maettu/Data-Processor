@@ -1,9 +1,7 @@
 use strict;
-use FindBin; use lib "$FindBin::Bin/../lib";
-#use lib 'lib';
+use lib 'lib';
 use Test::More;
 use Data::Processor;
-use Data::Dumper;
 
 my $schema = {
     merge => {
@@ -13,20 +11,17 @@ my $schema = {
                     my $value = shift;
                     return $value =~ /^[0-5]$/ ? undef : 'number from 0-5 expected';
                 },
+                description => 'number from 0-5',
             },
         },
     },
 };
 
 my $schema_2 = {
-    merge => {
-        members => {
-            number => {
-                validator => sub {
-                    my $value = shift;
-                    return $value =~ /^\d$/ ? undef : 'number from 0-9 expected';
-                },
-            },
+    number => {
+        validator => sub {
+            my $value = shift;
+            return $value =~ /^\d$/ ? undef : 'number from 0-9 expected';
         },
     },
 };
@@ -39,13 +34,12 @@ my $data = {
 
 my $p = Data::Processor->new($schema);
 
-$p->merge_schema($schema_2);
+my $error_collection = $p->merge_schema($schema_2, [ qw(merge members) ]);
 
-print Dumper $p->{schema};
+ok ($error_collection->count == 0, '0 errors detected');
 
-my $error_collection = $p->validate($data, verbose=>1);
+$error_collection = $p->validate($data, verbose=>0);
 
-# wrong array element will give 3 errors: 1 wrong key and 2 missing mandatory keys
 ok ($error_collection->count == 1, '1 error detected');
 
 done_testing;

@@ -218,30 +218,24 @@ sub validate_schema {
 
 =head2 merge_schema
 
-merges another schema into the schema
+merges another schema into the schema (optionally at a specific node)
 
- my $error_collection = $processor->merge_schema();
+ my $error_collection = $processor->merge_schema($schema_2);
 
 =cut
 
 sub merge_schema {
     my $self      = shift;
     my $schema    = shift;
-
     my $mergeNode = $self->{schema};
-    shift @{$_[0]} if $_->[0] eq 'root';
+
     for my $key (@{$_[0]}){
-        if (exists $mergeNode->{$key}){
-            $mergeNode = $mergeNode->{$key};
-        }
-        else{
-            croak "merge node does not exists";
-        }
+        exists $mergeNode->{$key} || ($mergeNode->{$key} = {});
+        $mergeNode = $mergeNode->{$key};
     }
 
     my $mergeSubSchema;
     $mergeSubSchema = sub {
-        my $elem           = shift;
         my $subSchema      = shift;
         my $otherSubSchema = shift;
 
@@ -250,23 +244,24 @@ sub merge_schema {
             my $key   = shift;
             my $warn  = shift;
 
-            if (!defined $subSchema->{$elem}->{$key}){
-                $subSchema->{$elem}->{$key}  = $otherSubSchema->{$elem}->{$key};
-            }
-            elsif (defined $otherSubSchema->{$elem}->{$key}
-                && $subSchema->{$elem}->{$key} ne $otherSubSchema->{$elem}->{$key}){
+            #nothing to do if key value is not defined
+            return if !defined $otherSubSchema->{$elem}->{$key};
 
+            if (!defined $subSchema->{$elem}->{$key}){
+                $subSchema->{$elem}->{$key} = $otherSubSchema->{$elem}->{$key};
+            }
+            elsif ($subSchema->{$elem}->{$key} ne $otherSubSchema->{$elem}->{$key}){
                 croak "merging element '$elem' : $key does not match" if !$warn;
                 warn "merging element '$elem': $key does not match, not merging it\n";
             }
         };
 
         for my $elem (keys %$otherSubSchema){
-            #copy whole sub schema if element does not yet exist on schema
-            exists $subSchema->{$elem} || do {
+            #copy whole sub schema if element does not yet exist or is empty
+            if (!(exists $subSchema->{$elem} && %{$subSchema->{$elem}})){
                 $subSchema->{$elem} = $otherSubSchema->{$elem};
                 next;
-            };
+            }
 
             #merge members subtree recursively
             exists $otherSubSchema->{$elem}->{members} && do {
@@ -274,13 +269,15 @@ sub merge_schema {
                 $mergeSubSchema->($subSchema->{$elem}->{members}, $otherSubSchema->{$elem}->{members});
             };
 
-            $checkKey->($elem, 'description', 1);
-            $checkKey->($elem, 'example', 1);
-            $checkKey->($elem, 'default', 1);
-            $checkKey->($elem, 'error_msg', 1);
-            $checkKey->($elem, 'regexp');
-            $checkKey->($elem, 'array');
-            $checkKey->($elem, 'value');
+            #elements which will cause a warning if different
+            for my $key (qw(description example default error_msg)){
+                $checkKey->($elem, $key, 1);
+            }
+
+            #elements which will cause an exception if different
+            for my $key (qw(regexp array value)){
+                $checkKey->($elem, $key);
+            }
 
             #special handler for transformer
             defined $otherSubSchema->{$elem}->{transformer} && do {
