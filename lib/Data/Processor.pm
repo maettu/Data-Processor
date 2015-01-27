@@ -242,7 +242,6 @@ sub merge_schema {
         my $checkKey = sub {
             my $elem  = shift;
             my $key   = shift;
-            my $warn  = shift;
 
             #nothing to do if key value is not defined
             return if !defined $otherSubSchema->{$elem}->{$key};
@@ -251,8 +250,7 @@ sub merge_schema {
                 $subSchema->{$elem}->{$key} = $otherSubSchema->{$elem}->{$key};
             }
             elsif ($subSchema->{$elem}->{$key} ne $otherSubSchema->{$elem}->{$key}){
-                croak "merging element '$elem' : $key does not match" if !$warn;
-                warn "merging element '$elem': $key does not match, not merging it\n";
+                croak "merging element '$elem' : $key does not match";
             }
         };
 
@@ -269,23 +267,14 @@ sub merge_schema {
                 $mergeSubSchema->($subSchema->{$elem}->{members}, $otherSubSchema->{$elem}->{members});
             };
 
-            #elements which will cause a warning if different
-            for my $key (qw(description example default error_msg)){
-                $checkKey->($elem, $key, 1);
-            }
-
-            #elements which will cause an exception if different
-            for my $key (qw(regex array value)){
+            #check elements
+            for my $key (qw(description example default error_msg regex array value)){
                 $checkKey->($elem, $key);
             }
 
             #special handler for transformer
-            defined $otherSubSchema->{$elem}->{transformer} && do {
-                croak "merging element '$elem': cannot overwrite tranformer"
-                    if (defined $subSchema->{$elem}->{transformer});
-                
-                $subSchema->{$elem}->{transformer} = $otherSubSchema->{$elem}->{transformer};
-            };
+            defined $otherSubSchema->{$elem}->{transformer} &&
+                croak "merging element '$elem': merging tranformer not allowed";
 
             #special handler for optional: set it mandatory if at least one is not optional
             delete $subSchema->{$elem}->{optional}
