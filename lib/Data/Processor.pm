@@ -275,7 +275,7 @@ sub merge_schema {
             }
 
             #elements which will cause an exception if different
-            for my $key (qw(regexp array value)){
+            for my $key (qw(regex array value)){
                 $checkKey->($elem, $key);
             }
 
@@ -292,18 +292,17 @@ sub merge_schema {
                 if !($subSchema->{$elem}->{optional} && $otherSubSchema->{$elem}->{optional});
 
             #special handler for validator: combine validator subs
-            if ((my $validator = $subSchema->{$elem}->{validator})
-                && $otherSubSchema->{$elem}->{validator}){
-
-                $subSchema->{$elem}->{validator} = sub {
-                    return $validator->(@_) // $otherSubSchema->{$elem}->{validator}->(@_);
-                };
-            }
-            elsif ($otherSubSchema->{$elem}->{validator}){
-                $subSchema->{$elem}->{validator} = sub {
-                    $otherSubSchema->{$elem}->{validator}->(@_)
-                };
-            }
+            $otherSubSchema->{$elem}->{validator} && do {
+                if (my $validator = $subSchema->{$elem}->{validator}){
+                    $subSchema->{$elem}->{validator} = sub {
+                        return $validator->(@_) // $otherSubSchema->{$elem}->{validator}->(@_);
+                    };
+                }
+                else{
+                    $subSchema->{$elem}->{validator}
+                        = $otherSubSchema->{$elem}->{validator};
+                }
+            };
         }
     };
 
