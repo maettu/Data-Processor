@@ -216,6 +216,90 @@ sub validate_schema {
     return Data::Processor::Validator->new($schemaSchema,%$self)->validate($self->{schema});
 }
 
+=head2 merge_schema
+
+merges another schema into the schema (optionally at a specific node)
+
+ my $error_collection = $processor->merge_schema($schema_2);
+
+=cut
+
+sub merge_schema {
+    my $self      = shift;
+    my $schema    = shift;
+    my $mergeNode = $self->{schema};
+
+    for my $key (@{$_[0]}){
+        exists $mergeNode->{$key} || ($mergeNode->{$key} = {});
+        $mergeNode = $mergeNode->{$key};
+    }
+
+    my $mergeSubSchema;
+    $mergeSubSchema = sub {
+        my $subSchema      = shift;
+        my $otherSubSchema = shift;
+
+        my $checkKey = sub {
+            my $elem  = shift;
+            my $key   = shift;
+
+            #nothing to do if key value is not defined
+            return if !defined $otherSubSchema->{$elem}->{$key};
+
+            if (!defined $subSchema->{$elem}->{$key}){
+                $subSchema->{$elem}->{$key} = $otherSubSchema->{$elem}->{$key};
+            }
+            elsif ($subSchema->{$elem}->{$key} ne $otherSubSchema->{$elem}->{$key}){
+                croak "merging element '$elem' : $key does not match";
+            }
+        };
+
+        for my $elem (keys %$otherSubSchema){
+            #copy whole sub schema if element does not yet exist or is empty
+            if (!(exists $subSchema->{$elem} && %{$subSchema->{$elem}})){
+                $subSchema->{$elem} = $otherSubSchema->{$elem};
+                next;
+            }
+
+            #merge members subtree recursively
+            exists $otherSubSchema->{$elem}->{members} && do {
+                exists $subSchema->{$elem}->{members} || ($subSchema->{$elem}->{members} = {});
+                $mergeSubSchema->($subSchema->{$elem}->{members}, $otherSubSchema->{$elem}->{members});
+            };
+
+            #check elements
+            for my $key (qw(description example default error_msg regex array value)){
+                $checkKey->($elem, $key);
+            }
+
+            #special handler for transformer
+            defined $otherSubSchema->{$elem}->{transformer} &&
+                croak "merging element '$elem': merging tranformer not allowed";
+
+            #special handler for optional: set it mandatory if at least one is not optional
+            delete $subSchema->{$elem}->{optional}
+                if !($subSchema->{$elem}->{optional} && $otherSubSchema->{$elem}->{optional});
+
+            #special handler for validator: combine validator subs
+            $otherSubSchema->{$elem}->{validator} && do {
+                if (my $validator = $subSchema->{$elem}->{validator}){
+                    $subSchema->{$elem}->{validator} = sub {
+                        return $validator->(@_) // $otherSubSchema->{$elem}->{validator}->(@_);
+                    };
+                }
+                else{
+                    $subSchema->{$elem}->{validator}
+                        = $otherSubSchema->{$elem}->{validator};
+                }
+            };
+        }
+    };
+
+    $mergeSubSchema->($mergeNode, $schema);
+
+    return $self->validate_schema;
+}
+
 =head2 transform_data
 
 Transform one key in the data according to rules specified
