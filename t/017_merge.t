@@ -26,6 +26,18 @@ my $schema_2 = {
     },
 };
 
+my $schema_transform = {
+    number => {
+        transformer => sub { },
+    },
+};
+
+my $schema_desc_mismatch = {
+    number => {
+        description => 'any number',
+    },
+};
+
 my $data = {
     merge => {
         number => 8,
@@ -41,6 +53,14 @@ ok ($error_collection->count == 0, '0 errors detected');
 $error_collection = $p->validate($data, verbose=>0);
 
 ok ($error_collection->count == 1, '1 error detected');
+
+eval { $error_collection = $p->merge_schema($schema_transform,  [ qw(merge members) ]) };
+
+like ($@, qr/transformer/, 'found transformer not a valid merge');
+
+eval { $error_collection = $p->merge_schema($schema_desc_mismatch, [ qw(merge members) ]) };
+
+like ($@, qr/description/, 'found description mismatch');
 
 done_testing;
 

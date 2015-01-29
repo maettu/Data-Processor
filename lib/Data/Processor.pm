@@ -222,6 +222,12 @@ merges another schema into the schema (optionally at a specific node)
 
  my $error_collection = $processor->merge_schema($schema_2);
 
+merging rules:
+ - merging transformers will result in an error
+ - merge checks if all merged elements match existing elements
+ - non existing elements will be added from merging schema
+ - validators from existing and merging schema get combined
+
 =cut
 
 sub merge_schema {
@@ -274,7 +280,7 @@ sub merge_schema {
 
             #special handler for transformer
             defined $otherSubSchema->{$elem}->{transformer} &&
-                croak "merging element '$elem': merging tranformer not allowed";
+                croak "merging element '$elem': merging transformer not allowed";
 
             #special handler for optional: set it mandatory if at least one is not optional
             delete $subSchema->{$elem}->{optional}
