@@ -74,6 +74,18 @@ This method gets called upon creation of a new Data::Processor object.
 
     my $error_collection = $processor->validate_schema();
 
+## merge\_schema
+
+merges another schema into the schema (optionally at a specific node)
+
+    my $error_collection = $processor->merge_schema($schema_2);
+
+merging rules:
+ - merging transformers will result in an error
+ - merge checks if all merged elements match existing elements
+ - non existing elements will be added from merging schema
+ - validators from existing and merging schema get combined
+
 ## transform\_data
 
 Transform one key in the data according to rules specified
