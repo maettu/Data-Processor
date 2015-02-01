@@ -1,6 +1,8 @@
 Revision history for Data-Processor
 
 {{$NEXT}}
+
+0.4.0  2015-02-01 18:03:22 CET
     - Improvements by @hadfl++ (Merge schemas, tests)
     - Install by EUMM
 
