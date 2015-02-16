@@ -2,7 +2,7 @@ package Data::Processor;
 
 use strict;
 use 5.010_001;
-our $VERSION = '0.4.0';
+our $VERSION = '0.4.1';
 
 use Carp;
 use Data::Processor::Error::Collection;
