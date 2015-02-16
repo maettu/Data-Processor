@@ -93,7 +93,7 @@ as callbacks that themodule calls for you.
 Transforms the data in-place.
 
     my $validator = Data::Processor::Validator->new($schema, data => $data)
-    my $error_string = $processor->transform($key, $validator);
+    my $error_string = $processor->transform($key, $schema_key, $value);
 
 This is not tremendously useful at the moment, especially because validate()
 transforms during validation.

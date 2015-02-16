@@ -8,3 +8,4 @@ MYMETA.*
 /.prove
 *.swp
 /todo
+Makefile
