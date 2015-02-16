@@ -27,25 +27,32 @@ my $schema = {
         transformer => $transformer->{timespec}(
             'specify timeout in seconds or append d,m,h to the number'),
     },
+    '\d' => {
+        regex => 1,        
+        transformer => $transformer->{timespec}(
+            'specify timeout in seconds or append d,m,h to the number'),
+    },
 };
 
 my $data = {
     history => '1h',
+    '3' => '1m',
 };
 
 my $validator = Data::Processor->new($schema);
 my $error_collection = $validator->validate($data, verbose=>0);
-ok ($data->{history} == 3600, 'transformed "1h" into "3600"');
+is ($data->{history} ,3600, 'transformed "1h" into "3600"');
+is ($data->{3} , 60, 'transformed "1m" into "60"');
 
 $data = {
     history => 'regards, your error :-)',
 };
 $error_collection = $validator->validate($data);
 
-ok ($data->{history} eq 'regards, your error :-)',
+is ($data->{history} , 'regards, your error :-)',
     'Could not transform "regards, your error :-)"');
-ok ($error_collection->{errors}[0]->{message}
-    =~ /^error transforming 'history': specify/,
+like ($error_collection->{errors}[0]->{message}
+    , qr/^error transforming 'history': specify/,
     'error from failed transform starts with "error transforming \'history\': specify"');
 
 

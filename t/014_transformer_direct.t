@@ -17,8 +17,8 @@ my $data = {
 
 my $v = Data::Processor::Validator->new($schema, data=>$data);
 my $p = Data::Processor->new($schema);
-my $error_collection = $p->transform_data('transform_here', $v);
+my $error_collection = $p->transform_data('transform_here', 'transform_here', $v);
 
-ok ($data->{transform_here}==42, 'transformed into 42');
+is ($data->{transform_here},42, 'transformed into 42');
 
 done_testing;

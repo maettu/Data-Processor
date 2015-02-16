@@ -313,7 +313,7 @@ as callbacks that themodule calls for you.
 Transforms the data in-place.
 
  my $validator = Data::Processor::Validator->new($schema, data => $data)
- my $error_string = $processor->transform($key, $validator);
+ my $error_string = $processor->transform($key, $schema_key, $value);
 
 This is not tremendously useful at the moment, especially because validate()
 transforms during validation.
@@ -326,9 +326,10 @@ transforms during validation.
 sub transform_data{
     my $self = shift;
     my $key  = shift;
+    my $schema_key = shift;
     my $val  = shift;
 
-    return Data::Processor::Transformer->new()->transform($key, $val);
+    return Data::Processor::Transformer->new()->transform($key, $schema_key, $val);
 }
 
 =head2 make_data
