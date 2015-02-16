@@ -51,7 +51,7 @@ sub validate {
         $self->__validator_returns_undef($key, $schema_key);
 
         # transformer
-        my $e = $self->{transformer}->transform($key, $self);
+        my $e = $self->{transformer}->transform($key,$schema_key, $self);
         $self->error($e) if $e;
 
         # skip if explicitly asked for
