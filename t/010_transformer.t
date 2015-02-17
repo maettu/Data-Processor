@@ -31,6 +31,9 @@ my $schema = {
         regex => 1,        
         transformer => $transformer->{timespec}(
             'specify timeout in seconds or append d,m,h to the number'),
+        validator => sub {
+             return "expected a number" unless shift =~ /^\d+$/;
+        }
     },
 };
 
