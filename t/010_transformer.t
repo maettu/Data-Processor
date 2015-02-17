@@ -33,6 +33,7 @@ my $schema = {
             'specify timeout in seconds or append d,m,h to the number'),
         validator => sub {
              return "expected a number" unless shift =~ /^\d+$/;
+             return undef;
         }
     },
 };
@@ -43,7 +44,8 @@ my $data = {
 };
 
 my $validator = Data::Processor->new($schema);
-my $error_collection = $validator->validate($data, verbose=>0);
+my $error_collection = $validator->validate($data, verbose=>1);
+is (scalar @{$error_collection->{errors}},0,"No Errors Found");
 is ($data->{history} ,3600, 'transformed "1h" into "3600"');
 is ($data->{3} , 60, 'transformed "1m" into "60"');
 
