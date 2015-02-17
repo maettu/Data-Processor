@@ -44,15 +44,18 @@ sub validate {
     for my $key (keys %{$self->{data}}){
         $self->explain (">>'$key'");
 
-        # checks
-        my $schema_key = $self->_schema_twin_key($key) or next;
+        # the shema key is ?
         # from here we know to have a "twin" key $schema_key in the schema
+        my $schema_key = $self->_schema_twin_key($key) or next;
+
+        # transformer (transform first)
+        my $e = $self->{transformer}->transform($key,$schema_key, $self);
+        $self->error($e) if $e;
+
+        # now validate
         $self->__value_is_valid( $key );
         $self->__validator_returns_undef($key, $schema_key);
 
-        # transformer
-        my $e = $self->{transformer}->transform($key,$schema_key, $self);
-        $self->error($e) if $e;
 
         # skip if explicitly asked for
         if ($self->{schema}->{$schema_key}->{no_descend_into}){
@@ -248,7 +251,7 @@ sub __validator_returns_undef {
     my $key        = shift;
     my $schema_key = shift;
     return unless $self->{schema}->{$schema_key}->{validator};
-    $self->explain("running validator for '$key': $self->{data}->{$key}\n");
+    $self->explain("running validator for '$key': ".($self->{data}->{$key} // '(undefined)').": \n");
 
     if (ref $self->{data}->{$key} eq ref []
         && $self->{schema}->{$schema_key}->{array}){
