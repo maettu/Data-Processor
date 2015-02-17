@@ -1,6 +1,7 @@
 Revision history for Data-Processor
 
 {{$NEXT}}
+    - bugfixes by @oetiker++
 
 0.4.1  2015-02-16 08:31:53 CET
     - fix transformer by @oetiker++
