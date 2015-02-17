@@ -204,7 +204,7 @@ sub validate_schema {
                     example => 'sub { my ($value,$section) = @_; return $value <= 1 ? "value must be > 1" : undef}'
                 },
                 transformer => {
-                    description => 'a callback which gets called on the value with (value,section) to validate the value. If it returns anything, this is treated as an error message',
+                    description => 'a callback which gets called on the value with (value,section) to transform the date into a format suitable for further processing. This is called BEFORE the validator. Die with C<{msg=>"error"}> if there is a problem!',
                     optional => 1,
                     validator => sub {
                         ref shift eq 'CODE' ? undef : 'expected a callback'
