@@ -83,11 +83,6 @@ sub validate {
             $actions{$_} and $actions{$_}->()
         }
 
-       #~         if ($self->{schema}->{$schema_key}->{no_descend_into}){
-#~             $self->explain (
-#~                 ">>skipping '$key' because schema explicitly says so.\n");
-#~             next;
-#~         }
         # skip data branch if schema key is empty.
         if (! %{$self->{schema}->{$schema_key}}){
             $self->explain (">>skipping '$key' because schema key is empty\n'");
