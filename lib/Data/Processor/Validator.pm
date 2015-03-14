@@ -43,7 +43,6 @@ sub validate {
 
     for my $key (keys %{$self->{data}}){
         $self->explain (">>'$key'");
-        say $key;
 
         # the shema key is ?
         # from here we know to have a "twin" key $schema_key in the schema
@@ -51,12 +50,9 @@ sub validate {
 
         my %actions = (
             transformer => sub {
-                say "transforming..";
-                $self->explain (">>now transforming you stuff\n");
                 my $e = $self->{transformer}
                                 ->transform($key,$schema_key, $self);
                 $self->error($e) if $e;
-                return 1;
             },
 
 
@@ -72,7 +68,6 @@ sub validate {
                 push @schema_keys, $_;
             }
         }
-        say "$key";
         for (@schema_keys){
             $actions{$_} and $actions{$_}->()
         }
