@@ -43,27 +43,39 @@ sub validate {
 
     for my $key (keys %{$self->{data}}){
         $self->explain (">>'$key'");
+        say $key;
 
         # the shema key is ?
         # from here we know to have a "twin" key $schema_key in the schema
         my $schema_key = $self->_schema_twin_key($key) or next;
 
-        # need to guarantee order of execution
-        my @actions = (
+        my %actions = (
             transformer => sub {
+                say "transforming..";
+                $self->explain (">>now transforming you stuff\n");
                 my $e = $self->{transformer}
                                 ->transform($key,$schema_key, $self);
                 $self->error($e) if $e;
+                return 1;
             },
+
 
         );
 
-        while (@actions){
-            my $key    = shift @actions;
-            my $action = shift @actions;
-            $action->() if ($self->{schema}->{$schema_key}->{$key})
+        my @schema_keys;
+        for (keys $self->{schema}->{$schema_key}){
+            # transformer needs to go first.
+            if ($_ eq 'transformer'){
+                unshift @schema_keys, $_;
+            }
+            else{
+                push @schema_keys, $_;
+            }
         }
-
+        say "$key";
+        for (@schema_keys){
+            $actions{$_} and $actions{$_}->()
+        }
 
         # now validate
         $self->__value_is_valid( $key );
