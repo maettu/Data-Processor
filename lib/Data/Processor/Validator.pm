@@ -65,14 +65,58 @@ sub validate {
                 $self->explain (
                 ">>skipping '$key' because schema explicitly says so.\n");
                 no warnings; next KEY;
-            }
+            },
+            members => sub {
+                if (ref $self->{data}->{$key} eq ref {} ){
+                    $self->explain
+                        (">>'$key' is not a leaf and we descend into it\n");
+                    my $e = Data::Processor::Validator->new(
+                        $self->{schema}->{$schema_key}->{members},
+                        parent_keys => [@{$self->{parent_keys}}, $key],
+                        depth       => $self->{depth}+1,
+                        verbose     => $self->{verbose},
 
+                    ) ->validate($self->{data}->{$key});
+                    $self->{errors}->add_collection($e);
+
+                }
+                elsif ((ref $self->{data}->{$key} eq ref [])
+                    && $self->{schema}->{$schema_key}->{array}){
+
+                    $self->explain(
+                    ">>'$key' is an array reference so we check all elements\n");
+                    for my $member (@{$self->{data}->{$key}}){
+                        my $e = Data::Processor::Validator->new(
+                            $self->{schema}->{$schema_key}->{members},
+                            parent_keys => [@{$self->{parent_keys}}, $key],
+                            depth       => $self->{depth}+1,
+                            verbose     => $self->{verbose},
+
+                        ) ->validate($member);
+                        $self->{errors}->add_collection($e);
+                    }
+                }
+                # Make sure that key in data is a leaf in schema.
+                # We cannot descend into a non-existing branch in data
+                # but it might be required by the schema.
+                else {
+                    $self->explain(">>checking data key '$key' which is a leaf..");
+                    if ($self->{schema}->{$schema_key}->{members}){
+                        $self->explain("but schema requires members.\n");
+                        $self->error("'$key' should have members");
+                    }
+                    else {
+                        $self->explain("schema key is also a leaf. ok.\n");
+                    }
+                }
+
+            }
         );
 
         my @schema_keys;
-        for (keys %{$self->{schema}->{$schema_key}}){
-            # transformer needs to go first.
-            if ($_ eq 'transformer'){
+        for (sort keys %{$self->{schema}->{$schema_key}}){
+            # transformer needs to go first, 'no_descend_into' before 'members'
+            if ($_ eq 'transformer' or $_ eq 'no_descend_into'){
                 unshift @schema_keys, $_;
             }
             else{
@@ -83,63 +127,58 @@ sub validate {
             $actions{$_} and $actions{$_}->()
         }
 
-        # skip data branch if schema key is empty.
-        if (! %{$self->{schema}->{$schema_key}}){
-            $self->explain (">>skipping '$key' because schema key is empty\n'");
-            next;
-        }
-        if (! $self->{schema}->{$schema_key}->{members}){
-            $self->explain (
-                ">>not descending into '$key'. No members specified\n"
-            );
-            next;
-        }
+#~         if (! $self->{schema}->{$schema_key}->{members}){
+#~             $self->explain (
+#~                 ">>not descending into '$key'. No members specified\n"
+#~             );
+#~             next;
+#~         }
 
         # recursion if we reach this point.
-        $self->explain (">>descending into '$key'\n");
-
-        if (ref $self->{data}->{$key} eq ref {} ){
-            $self->explain
-                (">>'$key' is not a leaf and we descend into it\n");
-            my $e = Data::Processor::Validator->new(
-                $self->{schema}->{$schema_key}->{members},
-                parent_keys => [@{$self->{parent_keys}}, $key],
-                depth       => $self->{depth}+1,
-                verbose     => $self->{verbose},
-
-            ) ->validate($self->{data}->{$key});
-            $self->{errors}->add_collection($e);
-
-        }
-        elsif ((ref $self->{data}->{$key} eq ref [])
-            && $self->{schema}->{$schema_key}->{array}){
-
-            $self->explain(
-            ">>'$key' is an array reference so we check all elements\n");
-            for my $member (@{$self->{data}->{$key}}){
-                my $e = Data::Processor::Validator->new(
-                    $self->{schema}->{$schema_key}->{members},
-                    parent_keys => [@{$self->{parent_keys}}, $key],
-                    depth       => $self->{depth}+1,
-                    verbose     => $self->{verbose},
-
-                ) ->validate($member);
-                $self->{errors}->add_collection($e);
-            }
-        }
-        # Make sure that key in data is a leaf in schema.
-        # We cannot descend into a non-existing branch in data
-        # but it might be required by the schema.
-        else {
-            $self->explain(">>checking data key '$key' which is a leaf..");
-            if ($self->{schema}->{$schema_key}->{members}){
-                $self->explain("but schema requires members.\n");
-                $self->error("'$key' should have members");
-            }
-            else {
-                $self->explain("schema key is also a leaf. ok.\n");
-            }
-        }
+#~         $self->explain (">>descending into '$key'\n");
+#~
+#~         if (ref $self->{data}->{$key} eq ref {} ){
+#~             $self->explain
+#~                 (">>'$key' is not a leaf and we descend into it\n");
+#~             my $e = Data::Processor::Validator->new(
+#~                 $self->{schema}->{$schema_key}->{members},
+#~                 parent_keys => [@{$self->{parent_keys}}, $key],
+#~                 depth       => $self->{depth}+1,
+#~                 verbose     => $self->{verbose},
+#~
+#~             ) ->validate($self->{data}->{$key});
+#~             $self->{errors}->add_collection($e);
+#~
+#~         }
+#~         elsif ((ref $self->{data}->{$key} eq ref [])
+#~             && $self->{schema}->{$schema_key}->{array}){
+#~
+#~             $self->explain(
+#~             ">>'$key' is an array reference so we check all elements\n");
+#~             for my $member (@{$self->{data}->{$key}}){
+#~                 my $e = Data::Processor::Validator->new(
+#~                     $self->{schema}->{$schema_key}->{members},
+#~                     parent_keys => [@{$self->{parent_keys}}, $key],
+#~                     depth       => $self->{depth}+1,
+#~                     verbose     => $self->{verbose},
+#~
+#~                 ) ->validate($member);
+#~                 $self->{errors}->add_collection($e);
+#~             }
+#~         }
+#~         # Make sure that key in data is a leaf in schema.
+#~         # We cannot descend into a non-existing branch in data
+#~         # but it might be required by the schema.
+#~         else {
+#~             $self->explain(">>checking data key '$key' which is a leaf..");
+#~             if ($self->{schema}->{$schema_key}->{members}){
+#~                 $self->explain("but schema requires members.\n");
+#~                 $self->error("'$key' should have members");
+#~             }
+#~             else {
+#~                 $self->explain("schema key is also a leaf. ok.\n");
+#~             }
+#~         }
     }
     # look for missing non-optional keys in schema
     # this is only done on this level.

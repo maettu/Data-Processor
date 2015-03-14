@@ -13,7 +13,7 @@ ok ($@ =~ /^cannot validate without "data"/, $@);
 my $data = data();
 my $error_collection = $processor->validate($data);
 my @errors = $error_collection->as_array();
-ok (scalar(@errors)==2, '2 errors found');
+ok (scalar(@errors)==2, 'error count should: 2, have '. $error_collection->count);
 ok ($error_collection->count()==2, 'error count =2');
 ok ($error_collection->any_error_contains(
         string => 'not_existing',
