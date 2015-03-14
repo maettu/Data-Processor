@@ -54,7 +54,8 @@ sub validate {
                                 ->transform($key,$schema_key, $self);
                 $self->error($e) if $e;
             },
-            value => sub {$self->__value_is_valid( $key, $schema_key )}
+            value => sub {$self->__value_is_valid( $key, $schema_key )},
+            validator => sub {$self->__validator_returns_undef($key, $schema_key)},
 
         );
 
@@ -73,7 +74,7 @@ sub validate {
         }
 
         # now validate
-        $self->__validator_returns_undef($key, $schema_key);
+#~         $self->__validator_returns_undef($key, $schema_key);
 
 
         # skip if explicitly asked for
@@ -326,13 +327,11 @@ sub __value_is_valid{
                     $self->explain(" ok.\n");
                 }
                 else{
-                    # XXX never reach this?
                     $self->explain(" no.\n");
                     $self->error("$elem does not match ^$self->{schema}->{$schema_key}->{value}\$");
                 }
             }
         }
-        # XXX this was introduced to support arrays.
         else {
             $self->explain(">>match '$self->{data}->{$key}' against '$self->{schema}->{$schema_key}->{value}'");
 
@@ -340,7 +339,6 @@ sub __value_is_valid{
                 $self->explain(" ok.\n");
             }
             else{
-                # XXX never reach this?
                 $self->explain(" no.\n");
                 $self->error("$self->{data}->{$key} does not match ^$self->{schema}->{$schema_key}->{value}\$");
             }
