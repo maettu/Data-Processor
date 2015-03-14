@@ -60,7 +60,7 @@ sub validate {
         );
 
         my @schema_keys;
-        for (keys $self->{schema}->{$schema_key}){
+        for (keys %{$self->{schema}->{$schema_key}}){
             # transformer needs to go first.
             if ($_ eq 'transformer'){
                 unshift @schema_keys, $_;
@@ -266,7 +266,6 @@ sub __validator_returns_undef {
     my $self       = shift;
     my $key        = shift;
     my $schema_key = shift;
-#~     return unless $self->{schema}->{$schema_key}->{validator};
     $self->explain("running validator for '$key': ".($self->{data}->{$key} // '(undefined)').": \n");
 
     if (ref $self->{data}->{$key} eq ref []
