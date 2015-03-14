@@ -73,10 +73,6 @@ sub validate {
             $actions{$_} and $actions{$_}->()
         }
 
-        # now validate
-#~         $self->__validator_returns_undef($key, $schema_key);
-
-
         # skip if explicitly asked for
         if ($self->{schema}->{$schema_key}->{no_descend_into}){
             $self->explain (
@@ -270,7 +266,7 @@ sub __validator_returns_undef {
     my $self       = shift;
     my $key        = shift;
     my $schema_key = shift;
-    return unless $self->{schema}->{$schema_key}->{validator};
+#~     return unless $self->{schema}->{$schema_key}->{validator};
     $self->explain("running validator for '$key': ".($self->{data}->{$key} // '(undefined)').": \n");
 
     if (ref $self->{data}->{$key} eq ref []
