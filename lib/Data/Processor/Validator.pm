@@ -48,9 +48,22 @@ sub validate {
         # from here we know to have a "twin" key $schema_key in the schema
         my $schema_key = $self->_schema_twin_key($key) or next;
 
-        # transformer (transform first)
-        my $e = $self->{transformer}->transform($key,$schema_key, $self);
-        $self->error($e) if $e;
+        # need to guarantee order of execution
+        my @actions = (
+            transformer => sub {
+                my $e = $self->{transformer}
+                                ->transform($key,$schema_key, $self);
+                $self->error($e) if $e;
+            },
+
+        );
+
+        while (@actions){
+            my $key    = shift @actions;
+            my $action = shift @actions;
+            $action->() if ($self->{schema}->{$schema_key}->{$key})
+        }
+
 
         # now validate
         $self->__value_is_valid( $key );
