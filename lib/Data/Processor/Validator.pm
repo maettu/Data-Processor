@@ -44,7 +44,7 @@ sub validate {
     for my $key (keys %{$self->{data}}){
         $self->explain (">>'$key'");
 
-        # the shema key is ?
+        # the schema key is ?
         # from here we know to have a "twin" key $schema_key in the schema
         my $schema_key = $self->_schema_twin_key($key) or next;
 
@@ -54,7 +54,7 @@ sub validate {
                                 ->transform($key,$schema_key, $self);
                 $self->error($e) if $e;
             },
-
+            value => sub {$self->__value_is_valid( $key, $schema_key )}
 
         );
 
@@ -73,7 +73,6 @@ sub validate {
         }
 
         # now validate
-        $self->__value_is_valid( $key );
         $self->__validator_returns_undef($key, $schema_key);
 
 
@@ -304,57 +303,52 @@ sub __validator_returns_undef {
 # called by validate to check if a value is in line with definitions
 # in the schema.
 sub __value_is_valid{
-    my $self    = shift;
-    my $key     = shift;
+    my $self       = shift;
+    my $key        = shift;
+    my $schema_key = shift;
 
-    if (exists  $self->{schema}->{$key}
-            and $self->{schema}->{$key}->{value}){
-        $self->explain('>>'.ref($self->{schema}->{$key}->{value})."\n");
+    $self->explain('>>'.ref($self->{schema}->{$schema_key}->{value})."\n");
 
-        # currently, 2 type of restrictions are supported:
-        # (callback) code and regex
-        if (ref($self->{schema}->{$key}->{value}) eq 'CODE'){
-            # possibly never implement this because of new "validator"
-        }
-        elsif (ref($self->{schema}->{$key}->{value}) eq 'Regexp'){
-            if (ref $self->{data}->{$key} eq ref []
-                && $self->{schema}->{$key}->{array}){
+    # currently, 2 type of restrictions are supported:
+    # (callback) code and regex
+    # XXX take this out
+    if (ref($self->{schema}->{$schema_key}->{value}) eq 'CODE'){
+        # possibly never implement this because of new "validator"
+    }
+    elsif (ref($self->{schema}->{$schema_key}->{value}) eq 'Regexp'){
+        if (ref $self->{data}->{$key} eq ref []
+            && $self->{schema}->{$schema_key}->{array}){
 
-                for my $elem (@{$self->{data}->{$key}}){
-                    $self->explain(">>match '$elem' against '$self->{schema}->{$key}->{value}'");
+            for my $elem (@{$self->{data}->{$key}}){
+                $self->explain(">>match '$elem' against '$self->{schema}->{$key}->{value}'");
 
-                    if ($elem =~ m/^$self->{schema}->{$key}->{value}$/){
-                        $self->explain(" ok.\n");
-                    }
-                    else{
-                        # XXX never reach this?
-                        $self->explain(" no.\n");
-                        $self->error("$elem does not match ^$self->{schema}->{$key}->{value}\$");
-                    }
-                }
-            }
-            # XXX this was introduced to support arrays.
-            else {
-               $self->explain(">>match '$self->{data}->{$key}' against '$self->{schema}->{$key}->{value}'");
-
-                if ($self->{data}->{$key} =~ m/^$self->{schema}->{$key}->{value}$/){
+                if ($elem =~ m/^$self->{schema}->{$schema_key}->{value}$/){
                     $self->explain(" ok.\n");
                 }
                 else{
                     # XXX never reach this?
                     $self->explain(" no.\n");
-                    $self->error("$self->{data}->{$key} does not match ^$self->{schema}->{$key}->{value}\$");
+                    $self->error("$elem does not match ^$self->{schema}->{$schema_key}->{value}\$");
                 }
             }
         }
-        else{
-            # XXX match literally? How much sense does this make?!
-            # also, this is not tested
+        # XXX this was introduced to support arrays.
+        else {
+            $self->explain(">>match '$self->{data}->{$key}' against '$self->{schema}->{$schema_key}->{value}'");
 
-            $self->explain("neither CODE nor Regexp\n");
-            $self->error("'$key' not CODE nor Regexp");
+            if ($self->{data}->{$key} =~ m/^$self->{schema}->{$schema_key}->{value}$/){
+                $self->explain(" ok.\n");
+            }
+            else{
+                # XXX never reach this?
+                $self->explain(" no.\n");
+                $self->error("$self->{data}->{$key} does not match ^$self->{schema}->{$schema_key}->{value}\$");
+            }
         }
-
+    }
+    else{
+        $self->explain("neither CODE nor Regexp\n");
+        $self->error("'$schema_key' not CODE nor Regexp");
     }
 }
 
