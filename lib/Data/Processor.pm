@@ -148,6 +148,10 @@ sub validate_schema {
                     optional => 1,
                     validator => $vf->rx(qr(.+),'expected an example string'),
                 },
+                no_descend_into => {
+                    optional => 1,
+                    description => 'do not check inside this node',
+                },
                 regex => {
                     description => 'should this key be treated as a regular expression?',
                     optional => 1,

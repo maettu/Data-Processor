@@ -40,7 +40,7 @@ sub validate {
     $self->{errors} = Data::Processor::Error::Collection->new();
 
     $self->_add_defaults();
-
+    KEY:
     for my $key (keys %{$self->{data}}){
         $self->explain (">>'$key'");
 
@@ -54,8 +54,18 @@ sub validate {
                                 ->transform($key,$schema_key, $self);
                 $self->error($e) if $e;
             },
-            value => sub {$self->__value_is_valid( $key, $schema_key )},
-            validator => sub {$self->__validator_returns_undef($key, $schema_key)},
+            value => sub {
+                $self->__value_is_valid( $key, $schema_key )
+            },
+            validator => sub {
+                $self->__validator_returns_undef($key, $schema_key)
+            },
+             # skip if explicitly asked for
+            no_descend_into => sub {
+                $self->explain (
+                ">>skipping '$key' because schema explicitly says so.\n");
+                no warnings; next KEY;
+            }
 
         );
 
@@ -73,12 +83,11 @@ sub validate {
             $actions{$_} and $actions{$_}->()
         }
 
-        # skip if explicitly asked for
-        if ($self->{schema}->{$schema_key}->{no_descend_into}){
-            $self->explain (
-                ">>skipping '$key' because schema explicitly says so.\n");
-            next;
-        }
+       #~         if ($self->{schema}->{$schema_key}->{no_descend_into}){
+#~             $self->explain (
+#~                 ">>skipping '$key' because schema explicitly says so.\n");
+#~             next;
+#~         }
         # skip data branch if schema key is empty.
         if (! %{$self->{schema}->{$schema_key}}){
             $self->explain (">>skipping '$key' because schema key is empty\n'");
@@ -190,8 +199,7 @@ sub _check_mandatory_keys{
 
     for my $key (keys %{$self->{schema}}){
         $self->explain(">>Checking if '$key' is mandatory: ");
-        unless ($self->{schema}->{$key}->{optional}
-                   and $self->{schema}->{$key}->{optional}){
+        unless ($self->{schema}->{$key}->{optional}){
 
             $self->explain("true\n");
             next if defined $self->{data}->{$key};
