@@ -60,6 +60,17 @@ Data::Processor - Transform Perl Data Structures, Validate Data against a Schema
   my $error_collection = $p->validate($data, verbose=>0);
   # no errors :-)
 
+  # in case of errors:
+  # ------------------
+  # print each error on one line.
+  say $error_collection;
+
+  # same
+  for my $e ($error_collection->as_array){
+      say $e;
+      # do more..
+  }
+
 =head1 DESCRIPTION
 
 Data::Processor is a tool for transforming, verifying, and producing Perl data structures from / against a schema, defined as a Perl data structure.
@@ -147,6 +158,10 @@ sub validate_schema {
                     description => 'an example value for this key',
                     optional => 1,
                     validator => $vf->rx(qr(.+),'expected an example string'),
+                },
+                no_descend_into => {
+                    optional => 1,
+                    description => 'do not check inside this node',
                 },
                 regex => {
                     description => 'should this key be treated as a regular expression?',

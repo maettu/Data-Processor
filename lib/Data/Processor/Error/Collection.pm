@@ -5,6 +5,8 @@ package Data::Processor::Error::Collection;
 use Carp;
 use Data::Processor::Error::Instance;
 
+use overload ('""' => \&to_string);
+
 =head1 NAME
 Data::Processor::Error::Collection - Collect errors for Data::Processor
 
@@ -91,6 +93,11 @@ Return count of errors.
 sub count {
     my $self = shift;
     return scalar @{$self->{errors}};
+}
+
+sub to_string {
+    my $self = shift;
+    return join "\n", $self->as_array;
 }
 1;
 
