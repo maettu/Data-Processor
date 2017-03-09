@@ -4,7 +4,7 @@
       "Matthias Bloch <matthias.bloch@puffin.ch>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 5.025, Dist::Milla version v1.0.9, CPAN::Meta::Converter version 2.143240",
+   "generated_by" : "Dist::Milla version v1.0.17, Dist::Zilla version 6.009, CPAN::Meta::Converter version 2.150005",
    "license" : [
       "perl_5"
    ],
@@ -15,12 +15,12 @@
    "name" : "Data-Processor",
    "no_index" : {
       "directory" : [
-         "t",
-         "xt",
+         "eg",
+         "examples",
          "inc",
          "share",
-         "eg",
-         "examples"
+         "t",
+         "xt"
       ]
    },
    "prereqs" : {
@@ -31,7 +31,7 @@
       },
       "develop" : {
          "requires" : {
-            "Dist::Milla" : "v1.0.9",
+            "Dist::Milla" : "v1.0.17",
             "Test::Pod" : "1.41"
          }
       },
@@ -58,11 +58,11 @@
          "web" : "https://github.com/maettu/Data-Processor"
       }
    },
-   "version" : "0.4.2",
+   "version" : "0.4.3",
    "x_contributors" : [
       "Dominik Hassler <hadfl@cpan.org>",
-      "Tobias Oetiker <tobi@oetiker.ch>",
-      "maettu <matthias.bloch@puffin.ch>"
-   ]
+      "Tobias Oetiker <tobi@oetiker.ch>"
+   ],
+   "x_serialization_backend" : "JSON::XS version 3.02"
 }
 

@@ -46,9 +46,6 @@ Data::Processor - Transform Perl Data Structures, Validate Data against a Schema
     my $error_collection = $p->validate($data, verbose=>0);
     # no errors :-)
 
-    my $error_collection = $p->validate($data, verbose=>0);
-    # no errors :-)
-
     # in case of errors:
     # ------------------
     # print each error on one line.
@@ -59,7 +56,6 @@ Data::Processor - Transform Perl Data Structures, Validate Data against a Schema
         say $e;
         # do more..
     }
-
 
 # DESCRIPTION
 
