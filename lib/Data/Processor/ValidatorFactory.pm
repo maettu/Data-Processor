@@ -91,7 +91,7 @@ not match.
 
 =cut
 
-sub  rx {
+sub rx {
     my $self = shift;
     my $rx = shift;
     my $msg = shift;
@@ -113,17 +113,15 @@ value must be one of the values of the @list
 =cut
 
 sub any {
-    my $self = shift;
+    my $self  = shift;
     my $array = [ @_ ];
-    my %hash = ( map { $_ => 1 } @$array );
+
     return sub {
         my $value = shift;
-        if ($hash{$value}){
-            return undef;
-        }
-        return "expected one a value from the list: ".join(', ',@$array);
+        return (grep { $_ eq $value } @$array) ? undef
+            : 'expected one a value from the list: ' . join(', ', @$array);
     }
-};
+}
 
 =head1 COPYRIGHT
 
@@ -141,3 +139,4 @@ the same terms as Perl itself.  See L<perlartistic>.
 
 =cut
 1;
+
