@@ -19,7 +19,7 @@ subtest 'members simple' => sub{
         }
     };
     my $p = Data::Processor->new($schema);
-    my $data = { cooridinates => { x => 1, y => 2} };
+    my $data = { coordinates => { x => 1, y => 2} };
 
     my $res = $p->validate($data);
     ok ( !$res, 'Examples validate themselves') or diag($res);
