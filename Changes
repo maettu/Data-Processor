@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+1.0.0  2018-05-21 11:02:23 CEST
+    - documentation improvements (contribution by draxil)
+
 0.4.5  2018-05-21 11:00:10 CEST
     - no empty err msg str if no error message (thanks, draxil)
 
