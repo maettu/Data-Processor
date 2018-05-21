@@ -7,7 +7,7 @@ use Data::Processor;
 subtest 'members simple' => sub{
 
     my $schema = {
-        cooridinates => {
+        coordinates => {
             members => {
                 x => {
                     description => "the x cooridinate",

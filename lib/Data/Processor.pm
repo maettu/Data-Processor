@@ -423,23 +423,23 @@ Obviously this can be nested all the way down:
  To have a key point to an array of things, simply use the array key. So:
 
  my $schema = {
-    house => {
+    houses => {
        array => 1,
     }
  };
 
  Would describe a structure like:
 
- { house => [] }
+ { houses => [] }
 
  And of course you can nest within here so:
 
  my $schema = {
-    house => {
+    houses => {
        array => 1,
        members => {
            name => {},
-           window => {
+           windows => {
                array => 1,
            }
        },
@@ -449,11 +449,11 @@ Obviously this can be nested all the way down:
  Might describe:
 
  {
-   house => [
+   houses => [
       { name => 'bob',
-        window => []},
+        windows => []},
       { name => 'harry',
-        window => []},
+        windows => []},
    ]
  }
 
