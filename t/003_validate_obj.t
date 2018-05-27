@@ -55,37 +55,8 @@ $error_collection = $processor->validate({top => {some_key => 42}});
 @errors = $error_collection->as_array();
 ok (scalar(@errors)==0, '0 error found');
 
-
-# optional tests if Types::Standard installed
-eval ("use Types::Standard -all");
-SKIP : {
-    skip "'Types::Standard' not installed" if $@;
-
-    use Types::Standard -all;
-    $schema = {
-        foo => {
-            validator => ArrayRef[Int],
-            description => 'an arrayref of integers'
-        }
-    };
-    eval { $processor = Data::Processor->new($schema) };
-    ok (! $@);
-
-    $error_collection = $processor->validate({foo => [42, 32, 99, 'bla']});
-    @errors = $error_collection->as_array();
-    ok (scalar(@errors)==1, '1 error found: "bla" is not an Int');
-    ok ($errors[0] =~ /Reference \[42,32,99,"bla"\] did not pass type constraint "ArrayRef\[Int\]"/);
-
-    $error_collection = $processor->validate({foo => [42, 32, 99, 99.9]});
-    @errors = $error_collection->as_array();
-    ok (scalar(@errors)==1, '1 error found: "99.9" is not an Int');
-    ok ($errors[0] =~ /Reference \[42,32,99,"99.9"] did not pass type constraint "ArrayRef\[Int\]"/);
-
-    $error_collection = $processor->validate({foo => [42, 32, 99, 9827456893475926589]});
-    ok ($error_collection->as_array == 0);
-}
-
 done_testing;
+
 
 package Broken::Validator;
 sub new {
