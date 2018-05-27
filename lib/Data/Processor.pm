@@ -5,6 +5,7 @@ use 5.010_001;
 our $VERSION = '1.0.1';
 
 use Carp;
+use Scalar::Util qw(blessed);
 use Data::Processor::Error::Collection;
 use Data::Processor::Validator;
 use Data::Processor::Transformer;
@@ -214,7 +215,14 @@ sub validate_schema {
                     description => 'a callback which gets called with (value,section) to validate the value. If it returns anything, this is treated as an error message',
                     optional => 1,
                     validator => sub {
-                        ref shift eq 'CODE' ? undef : 'expected a callback'
+                        my $v = shift;
+                        # "0" is a valid package, but is "false"
+                        my $blessed = blessed $v;
+                        if (defined $blessed){
+                            $v->can('validate') && return undef;
+                            return 'validator object must implement method "validate()"';
+                        }
+                        ref $v eq 'CODE' ? undef : 'expected a callback';
                     },
                     example => 'sub { my ($value,$section) = @_; return $value <= 1 ? "value must be > 1" : undef}'
                 },
