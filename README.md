@@ -2,8 +2,6 @@
 
 Data::Processor - Transform Perl Data Structures, Validate Data against a Schema, Produce Data from a Schema, or produce documentation directly from information in the Schema.
 
-[![Build Status](https://travis-ci.org/maettu/Data-Processor.svg?branch=master)](https://travis-ci.org/maettu/Data-Processor)
-
 # SYNOPSIS
 
     use Data::Processor;
@@ -346,6 +344,47 @@ value you return nothing:
     $p->validate({ bob => "harry"});
 
 See also [Data::Processor::ValidatorFactory](https://metacpan.org/pod/Data::Processor::ValidatorFactory)
+
+### Validator objects
+
+Validator may also be an object, in this case the object must implement a
+"validate" method.
+
+The "validate" method should return undef if valid, or an error message string if there is a problem.
+
+    package FiveChecker;
+
+    sub new {
+        bless {}, shift();
+    }
+
+    sub validate{
+        my( $self, $val ) = @_;
+        $val == 5 or return "I wanted five!";
+        return;
+    }
+    package main;
+
+    my $checker = FiveChecker->new;
+    my $schema = (
+        five => (
+            validator => $checker,
+        ),
+    );
+    my $dp = Data::Processor->new($schema);
+    $dp->validate({five => 6}); # fails
+    $dp->validate({five => 5}); # passes
+
+You can for example use MooseX::Types and Type::Tiny type constraints that are objects
+which offer validate methods which work this way.
+
+    use Types::Standard -all;
+
+    # ... in schema ...
+         foo => {
+             validator => ArrayRef[Int],
+             description => 'an arrayref of integers'
+         },
 
 # AUTHOR
 
