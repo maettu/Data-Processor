@@ -616,6 +616,8 @@ See also L<Data::Processor::ValidatorFactory>
 Validator may also be an object, in this case the object must implement a
 "validate" method.
 
+The "validate" method should return undef if valid, or an error message string if there is a problem.
+
  package FiveChecker;
 
  sub new {
@@ -639,6 +641,16 @@ Validator may also be an object, in this case the object must implement a
  $dp->validate({five => 6}); # fails
  $dp->validate({five => 5}); # passes
 
+You can for example use MooseX::Types and Type::Tiny type constraints that are objects
+which offer validate methods which work this way.
+
+ use Types::Standard -all;
+
+ # ... in schema ...
+      foo => {
+          validator => ArrayRef[Int],
+          description => 'an arrayref of integers'
+      },
 
 =head1 AUTHOR
 
