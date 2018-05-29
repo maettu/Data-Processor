@@ -21,12 +21,10 @@ ok (! $@);
 my $error_collection = $processor->validate({foo => [42, 32, 99, 'bla']});
 my @errors = $error_collection->as_array();
 ok (scalar(@errors)==1, '1 error found: "bla" is not an Int');
-ok ($errors[0] =~ /Reference \[42,32,99,"bla"\] did not pass type constraint "ArrayRef\[Int\]"/);
 
 $error_collection = $processor->validate({foo => [42, 32, 99, 99.9]});
 @errors = $error_collection->as_array();
 ok (scalar(@errors)==1, '1 error found: "99.9" is not an Int');
-ok ($errors[0] =~ /Reference \[42,32,99,"99.9"] did not pass type constraint "ArrayRef\[Int\]"/);
 
 $error_collection = $processor->validate({foo => [42, 32, 99, 9827456893475926589]});
 ok ($error_collection->as_array == 0);
