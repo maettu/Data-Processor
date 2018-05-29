@@ -611,6 +611,33 @@ value you return nothing:
 
 See also L<Data::Processor::ValidatorFactory>
 
+=head3 Validator objects
+
+Validator may also be an object, in this case the object must implement a
+"validate" method.
+
+ package FiveChecker;
+
+ sub new {
+     bless {}, shift();
+ }
+
+ sub validate{
+     my( $self, $val ) = @_;
+     $val == 5 or return "I wanted five!";
+     return;
+ }
+ package main;
+
+ my $checker = FiveChecker->new;
+ my $schema = (
+     five => (
+         validator => $checker,
+     ),
+ );
+ my $dp = Data::Processor->new($schema);
+ $dp->validate({five => 6}); # fails
+ $dp->validate({five => 5}); # passes
 
 
 =head1 AUTHOR
