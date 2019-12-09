@@ -343,7 +343,7 @@ value you return nothing:
     # would fail:
     $p->validate({ bob => "harry"});
 
-See also [Data::Processor::ValidatorFactory](https://metacpan.org/pod/Data::Processor::ValidatorFactory)
+See also [Data::Processor::ValidatorFactory](https://metacpan.org/pod/Data%3A%3AProcessor%3A%3AValidatorFactory)
 
 ### Validator objects
 
