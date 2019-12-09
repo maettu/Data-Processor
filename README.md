@@ -97,6 +97,10 @@ merging rules:
  - non existing elements will be added from merging schema
  - validators from existing and merging schema get combined
 
+## schema
+
+Returns the schema. Useful after schema merging.
+
 ## transform\_data
 
 Transform one key in the data according to rules specified
