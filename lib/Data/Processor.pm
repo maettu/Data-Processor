@@ -198,6 +198,16 @@ sub validate_schema {
                     default => 0,
                     validator => $bool
                 },
+                allow_empty => {
+                    description => 'allow empty entries in an array',
+                    optional => 1,
+                    default => 0,
+                    validator => sub {
+                        my ($value, $parent) = @_;
+                        return 'allow_empty can only be set for array' if !$parent->{array};
+                        return $value =~ /^[01]$/ ? undef : 'Expected 0 or 1';
+                    }
+                },
                 members => {
                     description => 'what keys do I expect in a hash hanging off this key',
                     optional => 1,
