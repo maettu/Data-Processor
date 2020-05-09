@@ -271,6 +271,9 @@ sub __validator_returns_undef {
 
         my $counter = 0;
         for my $elem (@{$self->{data}->{$key}}){
+            next if !defined $elem
+                && $self->{schema}->{$schema_key}->{allow_empty};
+
             my $return_value = $self->{schema}->{$schema_key}->{validator}->($elem, $self->{data});
             if ($return_value){
                 $self->explain("validator error: $return_value (element $counter)\n");
@@ -321,6 +324,9 @@ sub __value_is_valid{
                 && $self->{schema}->{$key}->{array}){
 
                 for my $elem (@{$self->{data}->{$key}}){
+                    next if !defined $elem
+                        && $self->{schema}->{$key}->{allow_empty};
+
                     $self->explain(">>match '$elem' against '$self->{schema}->{$key}->{value}'");
 
                     if ($elem =~ m/^$self->{schema}->{$key}->{value}$/){
