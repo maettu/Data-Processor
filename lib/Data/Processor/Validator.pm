@@ -274,7 +274,7 @@ sub __validator_returns_undef {
             next if !defined $elem
                 && $self->{schema}{$schema_key}{allow_empty};
 
-            my $return_value = $self->{schema}->{$schema_key}->{validator}->($elem, $self->{data});
+            my $return_value = $self->{schema}{$schema_key}{validator}($elem, $self->{data});
             if ($return_value){
                 $self->explain("validator error: $return_value (element $counter)\n");
                 $self->error("Execution of validator for '$key' element $counter returns with error: $return_value");
