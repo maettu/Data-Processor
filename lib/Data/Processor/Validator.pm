@@ -321,7 +321,7 @@ sub __value_is_valid{
         }
         elsif (ref($self->{schema}->{$key}->{value}) eq 'Regexp'){
             if (ref $self->{data}->{$key} eq ref []
-                && $self->{schema}->{$key}->{array}){
+                && $self->{schema}{$key}{array}){
 
                 for my $elem (@{$self->{data}->{$key}}){
                     next if !defined $elem
