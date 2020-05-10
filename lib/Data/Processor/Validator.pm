@@ -329,7 +329,7 @@ sub __value_is_valid{
 
                     $self->explain(">>match '$elem' against '$self->{schema}->{$key}->{value}'");
 
-                    if ($elem =~ m/^$self->{schema}->{$key}->{value}$/){
+                    if ($elem =~ m/^$self->{schema}{$key}{value}$/){
                         $self->explain(" ok.\n");
                     }
                     else{
