@@ -323,7 +323,7 @@ sub __value_is_valid{
             if (ref $self->{data}->{$key} eq ref []
                 && $self->{schema}{$key}{array}){
 
-                for my $elem (@{$self->{data}->{$key}}){
+                for my $elem (@{$self->{data}{$key}}){
                     next if !defined $elem
                         && $self->{schema}->{$key}->{allow_empty};
 
