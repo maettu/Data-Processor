@@ -325,7 +325,7 @@ sub __value_is_valid{
 
                 for my $elem (@{$self->{data}{$key}}){
                     next if !defined $elem
-                        && $self->{schema}->{$key}->{allow_empty};
+                        && $self->{schema}{$key}{allow_empty};
 
                     $self->explain(">>match '$elem' against '$self->{schema}->{$key}->{value}'");
 
