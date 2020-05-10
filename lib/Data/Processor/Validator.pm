@@ -270,7 +270,7 @@ sub __validator_returns_undef {
         && $self->{schema}->{$schema_key}->{array}){
 
         my $counter = 0;
-        for my $elem (@{$self->{data}->{$key}}){
+        for my $elem (@{$self->{data}{$key}}){
             next if !defined $elem
                 && $self->{schema}->{$schema_key}->{allow_empty};
 
@@ -365,4 +365,3 @@ sub __value_is_valid{
 }
 
 1;
-
