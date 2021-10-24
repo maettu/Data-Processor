@@ -50,7 +50,18 @@ sub validate {
 
     $self->_add_defaults_and_transform();
 
-    for my $key (keys %{$self->{data}}){
+    my $order = sub {
+        my ($a, $b) = @_;
+
+        return 1 if !$self->{schema_keys}->{$a}
+            || !$self->{schema}->{$self->{schema_keys}->{$a}}->{order};
+        return -1 if !$self->{schema_keys}->{$b}
+            || !$self->{schema}->{$self->{schema_keys}->{$b}}->{order};
+        return $self->{schema}->{$self->{schema_keys}->{$a}}->{order}
+            <=> $self->{schema}->{$self->{schema_keys}->{$b}}->{order};
+    };
+
+    for my $key (sort { $order->($a, $b) } keys %{$self->{data}}) {
         $self->explain (">>'$key'");
 
         my $schema_key = $self->{schema_keys}->{$key} or next;
