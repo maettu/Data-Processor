@@ -2,7 +2,7 @@ package Data::Processor;
 
 use strict;
 use 5.010_001;
-our $VERSION = '1.0.6';
+our $VERSION = '1.0.7';
 
 use Carp;
 use Scalar::Util qw(blessed);
