@@ -311,10 +311,10 @@ sub merge_schema {
             }
 
             #merge members subtree recursively
-            exists $otherSubSchema->{$elem}->{members} && do {
+            if (exists $otherSubSchema->{$elem}->{members}) {
                 exists $subSchema->{$elem}->{members} || ($subSchema->{$elem}->{members} = {});
                 $mergeSubSchema->($subSchema->{$elem}->{members}, $otherSubSchema->{$elem}->{members});
-            };
+            }
 
             #check elements
             for my $key (qw(description example default error_msg regex array value)){
@@ -322,16 +322,23 @@ sub merge_schema {
             }
 
             #special handler for transformer
-            defined $otherSubSchema->{$elem}->{transformer} &&
-                croak "merging element '$elem': merging transformer not allowed";
+            if ($otherSubSchema->{$elem}->{transformer}) {
+                croak "merging element '$elem': merging conflicting transformers not allowed"
+                    if $subSchema->{$elem}->{transformer}
+                        && $subSchema->{$elem}->{transformer} != $otherSubSchema->{$elem}->{transformer};
+
+                $subSchema->{$elem}->{transformer} = $otherSubSchema->{$elem}->{transformer};
+            }
 
             #special handler for optional: set it mandatory if at least one is not optional
             delete $subSchema->{$elem}->{optional}
                 if !($subSchema->{$elem}->{optional} && $otherSubSchema->{$elem}->{optional});
 
             #special handler for validator: combine validator subs
-            $otherSubSchema->{$elem}->{validator} && do {
-                if (my $validator = $subSchema->{$elem}->{validator}){
+            if ($otherSubSchema->{$elem}->{validator}) {
+                if ((my $validator = $subSchema->{$elem}->{validator})
+                    && $subSchema->{$elem}->{validator} != $otherSubSchema->{$elem}->{validator}) {
+
                     $subSchema->{$elem}->{validator} = sub {
                         return $validator->(@_) // $otherSubSchema->{$elem}->{validator}->(@_);
                     };
@@ -340,7 +347,7 @@ sub merge_schema {
                     $subSchema->{$elem}->{validator}
                         = $otherSubSchema->{$elem}->{validator};
                 }
-            };
+            }
         }
     };
 
