@@ -167,7 +167,6 @@ sub validate_schema {
                 regex => {
                     description => 'should this key be treated as a regular expression?',
                     optional => 1,
-                    default => 0,
                     validator => $bool
                 },
                 value => {
@@ -185,7 +184,6 @@ sub validate_schema {
                 optional => {
                     description => 'is this key optional ?',
                     optional => 1,
-                    default => 0,
                     validator => $bool,
                 },
                 default => {
@@ -195,13 +193,11 @@ sub validate_schema {
                 array => {
                     description => 'is the value of this key expected to be an array? In array mode, value and validator will be applied to each element of the array.',
                     optional => 1,
-                    default => 0,
                     validator => $bool
                 },
                 allow_empty => {
                     description => 'allow empty entries in an array',
                     optional => 1,
-                    default => 0,
                     validator => sub {
                         my ($value, $parent) = @_;
                         return 'allow_empty can only be set for array' if !$parent->{array};
